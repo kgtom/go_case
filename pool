@@ -1,0 +1,85 @@
+package main
+
+import (
+	"container/heap"
+	"log"
+	"math/rand"
+)
+
+var (
+	MaxWorks = 10000
+	MaxQueue = 1000
+)
+
+type Request struct {
+	fn   func() int
+	data []byte
+	op   int
+	c    chan int
+}
+
+type Worker struct {
+	req     chan Request
+	pending int
+	index   int
+	done    chan struct{}
+}
+
+type Pool []*Worker
+
+func (p Pool) Len() int {
+	return len(p)
+}
+func (p Pool) Less(i, j int) bool {
+	return p[i].pending < p[j].pending
+}
+
+func (p Pool) Swap(i, j int) {
+	p[i], p[j] = p[j], p[i]
+	p[i].index = i
+	p[j].index = j
+}
+
+func (p *Pool) Push(x interface{}) {
+
+	n := len(*p)
+	item := x.(*Worker)
+	item.index = n
+	//	log.Println("pool...Push", item.pending)
+	*p = append(*p, item)
+}
+
+func (p *Pool) Pop() interface{} {
+	old := *p
+	n := len(*p)
+	item := old[n-1]
+	//item.index = -1
+	*p = old[:n-1]
+	return item
+}
+func main() {
+	pool := new(Pool)
+	for i := 0; i < 4; i++ {
+		work := &Worker{
+			req:     make(chan Request, MaxQueue),
+			pending: rand.Intn(80),
+			index:   i,
+		}
+		log.Println("pengding", work.pending, "i", i)
+		heap.Push(pool, work)
+	}
+
+	heap.Init(pool)
+	log.Println("init heap success")
+	work := &Worker{
+		req:     make(chan Request, MaxQueue),
+		pending: 58,
+		index:   4,
+	}
+	heap.Push(pool, work)
+	log.Println("Push worker: pending", work.pending)
+	for pool.Len() > 0 {
+		worker := heap.Pop(pool).(*Worker)
+		log.Println("Pop worker:index", worker.index, "pending", worker.pending)
+	}
+}
