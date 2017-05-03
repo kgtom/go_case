@@ -1,0 +1,23 @@
+package main
+
+import (
+    "fmt"
+    "strings"
+)
+
+func getName(params ...interface{}) {
+    var paramSlice []string
+    for _, param := range params {
+        paramSlice = append(paramSlice, param.(string))
+    }
+ fmt.Println(paramSlice)
+    aa := strings.Join(paramSlice, "_") // Join 方法第2个参数是 string 而不是 rune
+    fmt.Println(aa)
+}
+
+func main() {
+    getName("tom", "100", "aa")
+}
+
+//param.(string) 简化版的断言
+
