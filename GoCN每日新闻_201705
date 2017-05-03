@@ -1,0 +1,32 @@
+GoCN每日新闻(2017-05-03)：
+
+1. Go 实战经验分享 http://blog.tamizhvendan.in/blog/2017/05/01/using-golang-in-production-my-experiences/
+2. Go 安全编程指南 https://checkmarx.gitbooks.io/go-scp/
+3. 基于 Go Kit 的微服务示例 http://gokit.io/examples/stringsvc.html
+4. 使用 Elastic Stack 来监控和调优 Golang 应用程序 https://my.oschina.net/u/569210/blog/852351
+5. 一款不一样的缓存组件 https://github.com/golang/groupcache
+
+编辑：谢烟客 & 傅小黑
+订阅新闻：http://tinyletter.com/gocn
+
+GoCN每日新闻(2017-05-02)
+
+  1. Go程序的套路	http://www.jianshu.com/p/215510810c59
+  2. 用 goquery 解析 HTML	http://liyangliang.me/posts/2016/03/zhihu-go-insight-parsing-html-with-goquery/
+  3. 年度语言 golang 使用感受	https://zhuanlan.zhihu.com/p/24898723
+  4. Go 实现 Ruby	https://github.com/goruby/goruby
+  5. GopherJS 的 React 绑定	https://github.com/myitcv/react/wiki
+
+
+编辑 傅小黑
+订阅新闻：http://tinyletter.com/gocn
+
+GOCN 每日新闻(2017-04-26)：
+
+1. [一个 Go 微信机器人包](http://www.cnblogs.com/orlion/p/6759431.html)
+2. [Go 性能优化小结](http://lanlingzi.cn/post/technical/2017/0203_go_optimize)
+3.  [以 Go 的思维去写 Go 代码]( http://tonybai.com/2017/04/20/go-coding-in-go-way)
+4. [使用 Prometheus 监控服务器性能](http://cjting.me/misc/2017-03-12-%E4%BD%BF%E7%94%A8Prometheus%E7%9B%91%E6%8E%A7%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%80%A7%E8%83%BD.html)
+5. [一个 Go 实现的分布式小文件存储系统](https://github.com/chrislusf/seaweedfs)
+
+编辑：谢烟客  更多信息：https://gocn.io/article/306
