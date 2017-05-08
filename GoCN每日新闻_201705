@@ -1,3 +1,38 @@
+
+GoCN每日新闻(2017-05-07)
+
+1. 深入理解HTTPS原理、过程与实践 https://zhuanlan.zhihu.com/p/26682342
+2. 并发之痛 Thread，go语言的Goroutine，akka的Actor http://www.iigrowing.cn/bing_fa_zhi_tong_threadgo_yu_yan_de_goroutineakka_de_actor.html
+3. Golang编码规范 http://www.jianshu.com/p/ea7dfe61f705
+4. JSON加速库 https://github.com/pquerna/ffjson
+5. 如何优雅地关闭Go channel http://www.tapirgames.com/blog/golang-channel-closing
+
+编辑：Asta
+订阅新闻：http://tinyletter.com/gocn
+网站地址：https://gocn.io/question/753
+
+GoCN每日新闻(2017-05-05):
+
+1. Golang 中的连续栈 http://blog.shiwuliang.com/2017/02/25/Go%E8%AF%AD%E8%A8%80%E4%B8%AD%E7%9A%84Continuous%20Stack(%E8%BF%9E%E7%BB%AD%E6%A0%88)/
+2. goroutine,channel和CSP http://www.moye.me/2017/05/05/go-concurrency-patterns/
+3. NSQ 作为微服务的消息总线 https://yami.io/golang-nsq/
+4. 使用 docker 部署 Golang web app 与 couchbase https://blog.couchbase.com/deploy-golang-web-application-couchbase-docker-containers/
+5. 一款 Go 的大数据 Query 框架 https://github.com/pilosa
+
+编辑：谢烟客 & Asta
+订阅新闻：http://tinyletter.com/gocn
+
+GoCN每日新闻(2017-05-04)
+
+1. 类型的安全还是便利   https://lanreadelowo.com/blog/2017/05/02/type-safety-or-convenience/
+2. Go的内存管理 http://www.tapirgames.com/blog/golang-memory-management
+3. 两年后端程序员的困惑https://gocn.io/question/745
+4. 数据库访问层upperDB https://upper.io/db.v3
+5. Go和Java的interface有什么不同 https://gocn.io/question/73
+
+编辑 Asta
+订阅新闻：http://tinyletter.com/gocn
+
 GoCN每日新闻(2017-05-03)：
 
 1. Go 实战经验分享 http://blog.tamizhvendan.in/blog/2017/05/01/using-golang-in-production-my-experiences/
