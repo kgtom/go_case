@@ -1,0 +1,15 @@
+package main
+
+import "fmt"
+import "time"
+
+func main() {
+	ch := make(chan bool, 1)
+	go worker(ch)
+	val := <-ch
+	fmt.Println("Finished", val)
+}
+func worker(ch chan bool) {
+	time.Sleep(2 * time.Second)
+	ch <- true
+}
