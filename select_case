@@ -1,0 +1,70 @@
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func doWorker(c chan int, quit chan bool) {
+	x, y := 0, 1
+	for {
+		select {
+		case c <- x:
+			x, y = y, x+y
+		case <-quit:
+			fmt.Println("it is time to  quit")
+			return
+		}
+	}
+}
+func main() {
+	fmt.Println("main routine start")
+	//demo 1 :主要练习 select case 的用法
+	ch := make(chan int)
+	timeout := make(chan bool, 1)
+	go func() {
+
+		//第一种方式：注释 time。Sleep(1e9)，两个case 都满足，go 随机选择一个执行
+		//	//time.Sleep(1e9) /
+		//	timeout <- true
+		//	ch <- 3
+
+		//第二种方式：ch <- 3，case 输出 ch
+		// ch <- 3
+		// time.Sleep(1e9)
+		// timeout <- true
+
+		//第三种方式：两个chan 没有send ，case 输出 default，这种情况下若没有default 分支，造成deadlock
+		//ch <- 3
+		time.Sleep(1e9)
+		//timeout <- true
+
+	}()
+
+	select {
+	case val := <-ch:
+		fmt.Println("ch...val:", val)
+	case <-timeout:
+		fmt.Println("timeout")
+	default:
+		fmt.Println("default")
+	}
+
+	//demo 2：主要练习 开启的goroutine 完成操作后，发送信号通知main gorotine 结束。
+
+	// c := make(chan int)
+	// quit := make(chan bool)
+	// go func() {
+	// 	for i := 0; i < 10; i++ {
+	// 		fmt.Println(<-c)
+	// 	}
+	// 	//执行操作后，发生quit信号，通知main routine 结束
+	// 	quit <- true
+	// }()
+	// doWorker(c, quit)
+	fmt.Println("main routine end")
+}
+
+//如果有同时多个case接收数据,那么Go会伪随机的选择一个case处理(pseudo-random)。
+//如果没有case需要处理，则会选择default去处理。
+//如果没有default case，且有发送的chan 则select语句会阻塞，直到某个case需要处理。
