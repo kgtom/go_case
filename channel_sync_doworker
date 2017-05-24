@@ -1,0 +1,19 @@
+channel可以用在goroutine之间的同步。
+main goroutine通过 ch channel等待 doworker完成任务。 doworker做完任务后只需往channel发送一个数据就可以通知main goroutine任务完成。
+
+
+package main
+
+import "fmt"
+import "time"
+
+func main() {
+	ch := make(chan bool, 1)
+	go worker(ch)
+	val := <-ch
+	fmt.Println("Finished", val)
+}
+func doworker(ch chan bool) {
+	time.Sleep(2 * time.Second)
+	ch <- true
+}
