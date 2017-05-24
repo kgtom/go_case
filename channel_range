@@ -1,0 +1,20 @@
+package main
+
+import "fmt"
+
+func main() {
+	fmt.Println("start")
+	c := make(chan interface{})
+	go func() {
+		for i := 0; i < 10; i = i + 1 {
+			c <- i
+		}
+		close(c)
+		//若注释 close(c),c channel未关闭，for range 一直接收状态，程序被堵塞在 for range 的地方，deadlock。
+	}()
+
+	for i := range c {
+		fmt.Println(i)
+	}
+	fmt.Println("end")
+}
