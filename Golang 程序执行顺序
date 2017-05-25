@@ -1,0 +1,37 @@
+package main
+
+import (
+	"fmt"
+	"runtime"
+)
+
+func init() {
+	
+	fmt.Printf("names: %v\n", names)
+
+	strValue = fmt.Sprintf("OS: %s, System Architecture: %s", runtime.GOOS, runtime.GOARCH)
+}
+
+// 全局变量，map类型并已初始化。
+var names = map[int]string{1: "tom", 2: "jim", 3: "lock"}
+
+// 全局变量，string类型未被初始化，默认“”值
+var strValue string
+
+func main() {
+	fmt.Println(strValue)
+}
+
+//本节知识点：
+//1.main()只能在package main 中，程序的入口函数,也称主函数,所在文件可以通过go run 直接启动。
+//2.init()程序执行前包的初始化函数，例如初始化变量。
+//3.fmt.Sprintf是fmt包中函数，用于格式化字符串并赋值给strValue,%v或者%s是格式化规则。
+
+//go run main.go 根据输出总结：
+
+// D:\goprojects\src\dailycase>go run main.go
+// names: map[1:tom 2:jim 3:lock]
+// OS: windows, System Architecture: amd64
+
+//1.全局变量的初始化会在 代码包初始化函数inti()之前；
+//2.所有代码包init()都会在mian()之前；被导入的代码包如果又init()函数都会在当前文件init()先执行
