@@ -1,0 +1,80 @@
+//总结：
+//1.抛开oo的思想，尤其是继承 ，不要刻意套 java C#的套路，使用go的方式去解决问题
+//2.
+
+package main
+
+import (
+	"fmt"
+)
+
+//订单表
+type Order struct {
+	Id    float64
+	Title string
+	Type  int
+}
+
+//工厂抽象方法
+type OrderBase interface {
+	CreateOrder(o *Order) Order
+}
+
+//工厂产生具体实例
+type Orderfactory interface {
+	createEntity() OrderBase
+}
+
+/////////////////////// 国内机票///////////////////////////////////////////////
+type InlandOrder struct {
+}
+type InlandOrderFactory struct {
+}
+
+func (a *InlandOrderFactory) createEntity() (entity OrderBase) {
+	entity = new(InlandOrder)
+	return
+}
+
+func (inOrder *InlandOrder) CreateOrder(o *Order) Order {
+	//todo 存储db
+	return *o
+}
+
+/////////////////////// 国际机票///////////////////////////////////////////////
+type OutLandOrder struct {
+}
+type OutLandOrderFactory struct {
+}
+
+func (s *OutLandOrderFactory) createEntity() (entity OrderBase) {
+	entity = new(OutLandOrder)
+	return
+}
+
+func (outOrder *OutLandOrder) CreateOrder(o *Order) Order {
+
+	//todo 存储db
+	return *o
+}
+
+func main() {
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println("sorry...")
+			fmt.Println(err)
+		}
+	}()
+
+	//国内机票
+	infac := new(InlandOrderFactory)
+	inOrderEntity := infac.createEntity()
+	inOrder := Order{Id: 1, Title: "国内机票", Type: 1}
+	fmt.Println(inOrderEntity.CreateOrder(&inOrder))
+
+	//国际机票
+	outfac := new(OutLandOrderFactory)
+	outOrderEntity := outfac.createEntity()
+	outOrder := Order{Id: 2, Title: "国际机票", Type: 2}
+	fmt.Println(outOrderEntity.CreateOrder(&outOrder))
+}
