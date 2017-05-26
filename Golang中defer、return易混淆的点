@@ -1,0 +1,48 @@
+package main
+
+import "fmt"
+
+func main() {
+	i := Test1()
+	fmt.Println("Test1 return ...i:", i) //i=0
+	ii := Test2()
+	fmt.Println("Test2 retrun...ii:", *ii) //i=2
+
+}
+
+func Test1() int {
+	var i int
+	defer func() {
+		i++
+		fmt.Println("Test1 defer1...i:", i) //i= 2
+	}()
+	defer func() {
+		i++
+		fmt.Println("Test1 defer2...i:", i) //i= 1
+	}()
+	//panic("sorry....") // 执行两个defer后输出 666，程序终止
+
+	fmt.Println("Test1...i:", i) //i =0
+	return i
+}
+
+func Test2() *int {
+	var i int
+	defer func() {
+		i++
+		fmt.Println("Test2 defer1...i:", i) //i= 2
+	}()
+	defer func() {
+		i++
+		fmt.Println("Test2 defer2...i:", i) //i= 1
+	}()
+
+	fmt.Println("Test2...i:", i) //i =0
+	return &i
+}
+
+//总结：
+//1.defer 延迟函数，多个defer 遵循FILO
+//2.执行顺序：函数本身Test1() > defer > return
+//3.注意 返回类型：指针仍旧指向同一块内存地址，值类型：主要变量作用域
+//4.遇到panic 执行完defer 后，执行panic,然后函数终止
