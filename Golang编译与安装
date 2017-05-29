@@ -1,0 +1,62 @@
+
+
+
+Golang编译：
+
+Go是一门编译型语言，所以在不同平台上，需要编译生成不同格式的二进制包。
+
+编译时候只需要指定两个参数：GOOS和GOARCH即可。
+
+总结：
+在window10 64bi系统下，需要新增两个环境变量 GOOS=linxu 和GOARCH=amd64
+
+在命令行 编译的时候，go build 即可，如果想要切换到 windows下编译，
+则 set GOOS=windows ,然后 go build 即可
+
+示例：
+
+# 编译到 linux 64bit
+$ GOOS=linux GOARCH=amd64 go build
+# 或者可以使用 -o 选项指定生成二进制文件名字
+$ GOOS=linux GOARCH=amd64 go build -o app.linux
+
+# 编译到 linux 32bit
+$ GOOS=linux GOARCH=386 go build
+
+# 编译到 windows 64bit
+$ GOOS=windows GOARCH=amd64 go build
+
+# 编译到 windows 32bit
+$ GOOS=windows GOARCH=386 go build
+
+# 编译到 Mac OS X 64bit
+$ GOOS=darwin GOARCH=amd64 go build
+
+Golang 部署：
+
+ 1.windows下，建立window服务，即 windows Service,然后启动windows下编译生成的exe可执行文件，开机自启动。
+ 2.linux下，使用supervisord 帮你把linux环境编译的二进制文件转成 daemon 程序。参数具体如下：
+
+ [program:test]  ---守护进程名称
+command=/var/opt/app/test_centos ---执行的二进制文件
+user=root
+autostart=true
+startsecs=10
+startretries=10
+stderr_logfile=/var/log/supervisor/test.stderr.log
+stdout_logfile=/var/log/supervisor/test.stdout.log
+
+举个例子：
+# supervisorctl  stop test
+test: stopped
+# supervisorctl status test
+test                             STOPPED   May 29 11:29 PM
+# supervisorctl restart test
+test: started
+# supervisorctl status test
+test                             RUNNING   pid 10200, uptime 0:00:41
+
+参考：https://beego.me/docs/deploy/supervisor.md
+     http://dmdgeeker.com/goBook/docs/ch01/cross_compile.html
+
+
