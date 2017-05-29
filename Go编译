@@ -8,7 +8,9 @@ Go是一门编译型语言，所以在不同平台上，需要编译生成不同
 编译时候只需要指定两个参数：GOOS和GOARCH即可。
 
 总结：
-在window10 64bi系统下，需要新增两个环境变量 GOOS=linxu 和GOARCH=amd64
+在window10 64bi系统下，需要新增两个环境变量 GOOS=linxu 和GOARCH=amd64，手动创建不说啦，下面说一下 命令行创建：
+
+setx test 6 -m 需要在管理员命令窗口，语言：setx key value -m ,创建成功后，需要重启cmd 窗口去使用。
 
 在命令行 编译的时候，go build 即可，如果想要切换到 windows下编译，则 set GOOS=windows ,然后 go build 即可
 
