@@ -1,4 +1,12 @@
 
+GoCN每日新闻(2017-05-26)
+
+1. 2017年开发者之路 https://github.com/kamranahmedse/developer-roadmap
+2. Go微服务开源平台 https://github.com/istio/istio
+3. Go1.8.3 发布了 https://golang.org/dl/
+4. Go里面指针和堆的关系 https://www.goinggo.net/2017/05/language-mechanics-on-stacks-and-pointers.html
+5. 用Go替代mapreduce来处理大数据 https://thinkfaster.co/2017/05/big-data-with-golang-instead-of-mapreduce/
+
 GoCN每日新闻(2017-05-17)
 
 1. 分布式Job系统 https://github.com/shunfei/cronsun
