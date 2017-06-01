@@ -1,0 +1,26 @@
+package main
+
+import (
+	"fmt"
+	"path"
+	"strings"
+)
+
+func main() {
+	fmt.Println("app start")
+
+	fullFileName := "/opt/aa.txt"
+	fmt.Println("fullFileName =", fullFileName)
+	var fileNameWithSuffix string
+	fileNameWithSuffix = path.Base(fullFileName) //获取文件名带后缀
+	fmt.Println("fileNameWithSuffix =", fileNameWithSuffix)
+	var fileSuffix string
+	fileSuffix = path.Ext(fileNameWithSuffix) //获取文件后缀
+	fmt.Println("fileSuffix =", fileSuffix)
+
+	var filenameOnly string
+	fileNameOnly = strings.TrimSuffix(fileNameWithSuffix, fileSuffix) //获取文件名
+	fmt.Println("fileNameOnly =", fileNameOnly)
+
+	fmt.Println("app end")
+}
