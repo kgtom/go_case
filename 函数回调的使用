@@ -1,0 +1,27 @@
+// 题目：test 函数 是一个接受一个函数和一个整数型slice作为参数的函数。函数应用于slice中的每个元素，
+//例如 test(f(),(a1,a2,...,an−1,an)) = (f(a1),f(a2),...,f(an−1),f(an))，返回计算后的slice
+
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	fmt.Println("app start")
+	m := []int{1, 3, 4}
+	f := func(i int) int {
+		return i
+	}
+	fmt.Printf("%v", (test(f, m)))
+	fmt.Println("app end")
+}
+func test(f func(int) int, l []int) []int {
+	j := make([]int, len(l))
+	for k, v := range l {
+		j[k] = f(v)
+		fmt.Printf("index...%d val:...%v\n", k, j)
+	}
+
+	return j
+}
