@@ -1,0 +1,24 @@
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	fmt.Println("app start")
+	s1 := []int{1, 3, 2, 4}
+	fmt.Printf("max: %d\n", test(s1))
+	fmt.Println("app end")
+}
+func test(s1 []int) []int {
+
+	for i := 0; i < len(s1)-1; i++ {
+
+		for j := i + 1; j < len(s1); j++ {
+			if s1[i] < s1[j] {
+				s1[i], s1[j] = s1[j], s1[i]
+			}
+		}
+	}
+	return s1
+}
