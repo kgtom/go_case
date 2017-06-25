@@ -1,0 +1,73 @@
+from:https://www.teakki.com/p/57df64d3da84a0c45338159e
+
+本节只介绍第一种： rpc.Register
+参考：http://daizuozhuo.github.io/golang-rpc-practice/
+注意的使用过程中的坑：
+1.四五台机器时可以使用，如果集群的话，直接改用tcp的方式
+2.rpc包里的rpc.Dial函数没有timeout,net包里的 net.DialTimeout函数.
+3.rpc包里默认使用gobCodec来编码解码, 这里io可能会卡住而不返回错误,所以我们要自己编写加入timeout的codec
+
+package main
+
+import (
+	"log"
+	"net"
+	"net/rpc"
+	"time"
+)
+
+type Args struct {
+	A, B int
+}
+type Arith int
+
+func (t *Arith) Multiply(args *Args, reply *([]string)) error {
+	*reply = append(*reply, "test111")
+	return nil
+}
+
+func ListenRPC() {
+	arith := new(Arith)
+	rpc.Register(arith)
+	rpc.HandleHTTP()
+	l, e := net.Listen("tcp", ":1234")
+	if e != nil {
+		log.Fatal("listen error:", e)
+	}
+	//go http.Serve(l, nil)
+	go func() {
+		for {
+			conn, err := l.Accept()
+			if err != nil {
+				log.Print("Error: accept rpc connection", err.Error())
+				continue
+			}
+			go rpc.ServeConn(conn)
+		}
+	}()
+}
+
+func clientCal() {
+	client, err := rpc.Dial("tcp", "127.0.0.1"+":1234") //pc.Dial函数没有timeout
+	//net.DialTimeout("tcp", "127.0.0.1"+":1234", time.Second*5)
+	rpc.Dial("tcp", "127.0.0.1"+":1234") //pc.Dial函数没有timeout
+	//rpc.DialHTTP("tcp", "127.0.0.1"+":1234")
+	if err != nil {
+		log.Fatal("dialing:", err)
+	}
+	args := &Args{7, 8}
+	reply := make([]string, 10)
+
+	err = client.Call("Arith.Multiply", args, &reply)
+	if err != nil {
+		log.Fatal("arith error:", err)
+	}
+	log.Println(reply)
+}
+func main() {
+	ListenRPC()
+	time.Sleep(5 * time.Second)
+
+	clientCal()
+
+}
