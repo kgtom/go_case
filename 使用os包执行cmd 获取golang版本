@@ -1,0 +1,28 @@
+package main
+
+import (
+	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"os/exec"
+)
+
+func main() {
+
+	server()
+}
+func server() {
+
+	http.HandleFunc("/v", hander_version)
+
+	http.ListenAndServe(":985", nil)
+}
+
+func hander_version(w http.ResponseWriter, r *http.Request) {
+	out, err := exec.Command("go", "version").Output()
+	if err != nil {
+		log.Fatal(err)
+	}
+	io.WriteString(w, fmt.Sprintf("%s", out))
+}
