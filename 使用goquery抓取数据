@@ -1,0 +1,50 @@
+//参考：http://blog.csdn.net/liangguangchuan/article/details/53928979
+package main
+
+import (
+	"fmt"
+
+	"github.com/PuerkitoBio/goquery"
+)
+
+type Book struct {
+	Title  string //标题
+	Img    string //图片地址
+	Author string //作者
+	Sell   string //价格
+	Url    string //访问链接
+}
+
+func main() {
+	var (
+		url string = "https://www.zhihu.com/publications"
+	)
+	//使用 goquery 创建 dom 对象
+	query, query_err := goquery.NewDocument(url)
+	if query_err != nil {
+		fmt.Println(query_err)
+	}
+
+	data_arr := make(map[int]Book, 100)
+	//找到 ui-->li ---> text
+	query.Find("ul[class=\"BookList PubIndex-recommends\"]").Eq(0).Find("li").Each(func(i int, s *goquery.Selection) {
+		a := s.Find("a").Eq(0)
+		a.Next()
+		r := Book{}
+		//获取对应 跳转链接
+		r.Url, _ = a.Attr("href")
+		//获取书的名字
+		r.Title = a.Find(".BookItem-title").Eq(0).Text()
+		//获取书的图片
+		r.Img, _ = a.Find(".BookItem-coverWrapper").Eq(0).Find("img").Attr("src")
+		//获取书的作者
+		r.Author = a.Find(".BookItem-authors").Eq(0).Text()
+		//获取书的售价
+		r.Sell = a.Find(".BookItem-promotion").Eq(0).Find("span").Eq(0).Text()
+		data_arr[i] = r
+	})
+	for k, v := range data_arr {
+		fmt.Println(k, v)
+	}
+
+}
