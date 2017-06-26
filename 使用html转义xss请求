@@ -1,0 +1,35 @@
+
+参考：http://blog.csdn.net/liangguangchuan
+package main
+
+import (
+	"fmt"
+	"html/template"
+	"log"
+	"net/http"
+)
+
+func main() {
+	http.HandleFunc("/", Handler)
+	http.ListenAndServe(":985", nil)
+}
+
+func Handler(w http.ResponseWriter, req *http.Request) {
+	err := req.ParseForm()
+	//如果解析失败 直接退出 输出对应的错误原因
+	if err != nil {
+		log.Fatal(nil)
+	}
+	//获取 传递的name 参数
+	user_pro := req.FormValue("name")
+
+	//fmt.Fprintf(w, "%s", user_pro) //这种不能阻止xss
+	fmt.Fprintf(w, "%s", xss_hander(user_pro)) //使用这种
+
+	//test:http://localhost:985/?name=%3Cscript%3Ealter(4)%3C/script%3E
+	//输出：&lt;script&gt;alter(4)&lt;/script&gt;
+}
+
+func xss_hander(s string) string {
+	return template.HTMLEscapeString(s)
+}
