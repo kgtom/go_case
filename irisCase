@@ -1,0 +1,77 @@
+package main
+
+import (
+	"gopkg.in/kataras/iris.v6"
+	"gopkg.in/kataras/iris.v6/adaptors/httprouter"
+)
+
+// User bind struct
+type User struct {
+	Firstname string `json:"firstname"`
+	Lastname  string `json:"lastname"`
+	Age       int    `json:"age"`
+}
+type Company struct {
+	Name  string
+	City  string
+	Other string
+}
+
+func MyHandler(ctx *iris.Context) {
+	c := &Company{}
+	if err := ctx.ReadJSON(c); err != nil {
+		ctx.Log(iris.DevMode, err.Error())
+		return
+	}
+
+	ctx.Writef("Company: %#v\n", c)
+}
+func main() {
+	app := iris.New()
+	// Adapt the "httprouter", faster,
+	// but it has limits on named path parameters' validation,
+	// you can adapt "gorillamux" if you need regexp path validation!
+	app.Adapt(httprouter.New())
+
+	// app.HandleFunc("GET", "/", func(ctx *iris.Context) {
+	// 	ctx.Writef("hello world\n")
+	// })
+	app.Get("/hi/*parma", hi)
+	app.Post("/decode", func(ctx *iris.Context) {
+		//user := User{"tom", "Green", 19}
+
+		var user User
+		ctx.ReadJSON(&user)
+
+		ctx.Writef("%s %s is %d years old!", user.Firstname, user.Lastname, user.Age)
+	})
+
+	app.Get("/encode", func(ctx *iris.Context) {
+		peter := User{
+			Firstname: "John",
+			Lastname:  "Doe",
+			Age:       25,
+		}
+
+		ctx.JSON(iris.StatusOK, peter)
+	})
+	app.Post("/readjson", MyHandler)
+	app.Listen(":880")
+
+}
+func hi(ctx *iris.Context) {
+	//ctx.Render("hi.html", struct{ Name string }{Name: "iris"})
+
+	//ctx.Writef("hello world\n")
+	// ctx.JSON(iris.StatusOK, iris.Map{
+	// 	"Name":  "Iris",
+	// 	"Born":  "13 March 2016",
+	// 	"Stars": 3693,
+	// })
+	val, err := ctx.ParamIntWildcard("parma")
+	if val == -1 {
+		ctx.Writef("err %s \n", err)
+	}
+	ctx.Writef("hello world %d \n", val)
+	//ctx.HTML(iris.StatusOK, "Hello, the dynamic path after /myfiles is:<br/> <b>"+val+"</b>")
+}
