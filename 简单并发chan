@@ -1,0 +1,26 @@
+j := make(chan int, 3)//数据通道
+	k := make(chan bool) //信号通道
+	go func() { //启动并行
+		for {
+			
+			s, ok := <-j //如果通道没有值 阻塞 等待
+			if ok {
+				fmt.Printf("get value is %d \n", s)
+			} else { //当通道关闭，并且没有数据的情况下调用
+
+				k <- true
+
+			}
+		}
+	}()
+
+	for i := 1; i < 3; i++ {
+		//j <- i //通道写数据
+		fmt.Printf("send j value is %d \n", i)
+	}
+
+	close(j) //关闭通道
+
+	fmt.Println("set j all ")
+
+	<-k
