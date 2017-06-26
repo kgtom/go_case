@@ -1,4 +1,5 @@
 //参考：http://blog.csdn.net/liangguangchuan/article/details/53928979
+//注意一点 golang.org/x/net/html 这个包需要借助http://www.golangtc.com/download/package  下载
 package main
 
 import (
