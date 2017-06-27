@@ -1,0 +1,48 @@
+package vsDemo
+
+import (
+	"fmt"
+	"strconv"
+	"time"
+)
+
+func doSomething(str string, quit chan bool) {
+	fmt.Println("begin doSomething..." + str)
+	time.Sleep(10 * time.Second)
+	for {
+		i, isClose := <-quit
+		if !isClose {
+			fmt.Println("quit closed!")
+			break
+		}
+		fmt.Println("quit val....", i)
+	}
+	fmt.Println("end doSomething...")
+}
+func test(timeOut chan bool, worker chan string) {
+	for {
+		select {
+		//timeOut signal
+		case <-timeOut:
+			return
+			//worker signal
+		case str := <-worker:
+			doSomething(str, timeOut)
+		}
+	}
+}
+func DoTask() {
+	fmt.Println("begin task...")
+	timeOut := make(chan bool)
+	worker := make(chan string, 10)
+	for i := 0; i < 10; i++ {
+		go func(index int) {
+			worker <- strconv.Itoa(index)
+		}(i)
+	}
+	go test(timeOut, worker)
+	//1s后 timeOut
+	time.Sleep(1 * time.Second)
+	timeOut <- true
+	fmt.Println("end task...")
+}
