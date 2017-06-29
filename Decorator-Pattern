@@ -1,0 +1,64 @@
+//Decorator 装饰模式：
+// 动态地给一个对象添加一些额外的职责,遵循开闭原则，比增加子类更灵活。
+
+package main
+
+import (
+	"fmt"
+)
+
+type AirTicket struct {
+	desc string
+}
+
+func (p *AirTicket) show() {
+	if p == nil {
+		return
+	}
+	fmt.Println("行程描述：", p.desc)
+}
+
+type AbstractAirTicket interface {
+	show()
+}
+type Decorator struct {
+	AbstractAirTicket
+}
+
+func (d *Decorator) SetDecorator(component AbstractAirTicket) {
+	if d == nil {
+		return
+	}
+	d.AbstractAirTicket = component
+}
+
+func (d *Decorator) show() {
+	if d == nil {
+		return
+	}
+	if d.AbstractAirTicket != nil {
+		d.AbstractAirTicket.show()
+	}
+}
+
+type AirPicUp struct {
+	Decorator
+}
+
+func (t *AirPicUp) show() {
+	if t == nil {
+		return
+	}
+	t.Decorator.show()
+	fmt.Println("sha-接机券一张")
+}
+
+func main() {
+	airTicket := &AirTicket{"pek-sha"}
+	airTicket.show()
+	fmt.Println()
+	ap := new(AirPicUp)
+	ap.SetDecorator(airTicket)
+	ap.show()
+
+}
