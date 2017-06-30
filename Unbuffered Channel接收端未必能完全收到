@@ -1,0 +1,24 @@
+
+
+package main
+
+import "fmt"
+import "runtime"
+
+func main() {
+	ch := make(chan string)
+
+	runtime.GOMAXPROCS(1) //设置开启一个p去执行go
+	go func() {
+		for m := range ch {
+			fmt.Println("processed:", m)
+		}
+	}()
+
+	ch <- "1"
+	ch <- "2"
+	ch <- "3"
+	ch <- "4"
+	ch <- "5"
+	ch <- "6" //won't be processed
+}
