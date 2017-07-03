@@ -1,0 +1,53 @@
+
+goroutine：很简单的执行单元,自然运行结束，一些其它操作应该在自己code里实现，尽量不要揉进goroutine，例如超时机制
+
+package main
+
+import "fmt"
+
+func main() {
+
+	ch := make(chan int, 15)
+	for i := 0; i < 10; i++ {
+		go Dosomething(ch, i)
+	}
+	for {
+		select {
+		case val := <-ch:
+			fmt.Printf("receive...%v \n", val)
+
+		default:
+			break
+		}
+	}
+
+}
+func Dosomething(ch chan int, i int) {
+
+	ch <- i
+	fmt.Println("send....", i)
+}
+
+WaitGroup的用途：它能够阻塞主线程的执行,一直等到所有的goroutine执行完成。
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+func main() {
+	var wg sync.WaitGroup
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			Dosomething(i)
+		}(i)
+	}
+	wg.Wait()
+}
+func Dosomething(i int) {
+
+	fmt.Println("send....", i)
+}
