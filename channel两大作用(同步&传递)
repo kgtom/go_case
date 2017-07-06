@@ -1,9 +1,32 @@
 package main
 
-import (
-	"fmt"
-	"time"
-)
+import "fmt"
+
+func Producer(ch chan int) {
+
+	for i := 0; i < 5; i++ {
+		ch <- i
+	}
+
+}
+
+func Consumer(ch chan int, q chan bool) {
+
+	for i := 0; i < 5; i++ {
+		v, ok := <-ch
+		if ok {
+			fmt.Println("rec...", v)
+		} else {
+			fmt.Println("not rec...", v)
+		}
+		// for v := range queue {
+		// 	fmt.Println("receive:", v)
+		// }
+
+	}
+	q <- true
+
+}
 
 //channel 作用：1.同步 2. 传递数据
 func main() {
@@ -11,7 +34,19 @@ func main() {
 	CaseSyncFun()
 
 	//2.数据传递--经典生产者与消费者
-	CaseSendFunc()
+	ch := make(chan int)
+	quit := make(chan bool)
+	go Producer(ch)
+	go Consumer(ch, quit)
+
+	//time.Sleep(1e9) //阻塞主goroutine 让Producer与Consumer完成
+	//或者使用 quit 退出信号
+	v, ok := <-quit
+	if ok {
+		fmt.Print("v...", v)
+	} else {
+		fmt.Print("not v")
+	}
 }
 
 func CaseSyncFun() {
@@ -30,34 +65,9 @@ func CaseSyncFun() {
 	fmt.Printf("ch...%v \n", val)
 }
 
-func CaseSendFunc() {
-	queue := make(chan int, 1)
-
-	go Producer(queue)
-
-	go Consumer(queue)
-
-	time.Sleep(1e9) //让Producer与Consumer完成
-}
 func doWork() {
 	fmt.Print("do work...\n")
 }
 func doSomething() {
 	fmt.Print("do sth...")
-}
-
-func Producer(queue chan<- int) {
-
-	for i := 0; i < 10; i++ {
-		queue <- i
-	}
-
-}
-
-func Consumer(queue <-chan int) {
-	for i := 0; i < 10; i++ {
-		v := <-queue
-		fmt.Println("receive:", v)
-	}
-
 }
