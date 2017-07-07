@@ -1,0 +1,32 @@
+package main
+
+import "fmt"
+
+type Request struct {
+	args       []int
+	resultChan chan int
+}
+
+func main() {
+
+	request := &Request{[]int{1, 2, 3}, make(chan int)}
+	// Send rq
+	clientRequests := make(chan *Request)
+	go handle(clientRequests)
+
+	// Wait for rs.
+	clientRequests <- request
+	fmt.Printf("result: %d\n", <-request.resultChan)
+
+}
+func handle(queue chan *Request) {
+	for req := range queue {
+		fmt.Printf("handle...%v \n", req)
+		result := dosomething()
+		req.resultChan <- result
+	}
+}
+func dosomething() int {
+	fmt.Print("dosomething...")
+	return 1
+}
