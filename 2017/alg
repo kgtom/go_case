@@ -63,6 +63,8 @@ func SelectSort(s []int) {
 		}
 	}
 }
+
+//快排
 func quickSort(source []int, l, u int) {
 	if l < u {
 		m := partition(source, l, u)
@@ -87,6 +89,37 @@ func partition(source []int, l, u int) int {
 	return left + 1
 }
 
+//插入排序
+func insertionSort(s1 []int) {
+	for i := 1; i < len(s1); i++ {
+		for j := i; j > 0; j-- {
+			if s1[j] < s1[j-1] {
+				Swap(s1, j, j-1)
+			}
+
+		}
+	}
+}
+
+//希尔排序
+func ShellSort(arr []int) []int {
+	length := len(arr)
+	// 确定h
+	h := 1
+	for h < length/3 {
+		h = h*3 + 1
+	}
+	for h >= 1 {
+		for i := h; i < length; i++ {
+			for j := i; j >= h && arr[j] < arr[j-h]; j -= h {
+				arr[j], arr[j-h] = arr[j-h], arr[j]
+			}
+		}
+		h /= 3
+	}
+	return arr
+}
+
 //交换
 func Swap(s1 []int, i int, j int) {
 	s1[i], s1[j] = s1[j], s1[i]
@@ -106,7 +139,13 @@ func main() {
 	// SelectSort(s1)
 	// fmt.Printf("SelectSort:%v \n", s1)
 
-	quickSort(s1, 0, len(s1))
-	fmt.Printf("quickSort:%d \n", s1)
+	//quickSort(s1, 0, len(s1))
+	//fmt.Printf("quickSort:%d \n", s1)
+	//insertionSort(s1)
+	//fmt.Printf("insertionSort:%v ", s1)
+
+	ShellSort(s1)
+	fmt.Printf("shellSort: %v", s1)
 
 }
+
