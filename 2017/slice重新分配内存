@@ -1,0 +1,32 @@
+from：http://devs.cloudimmunity.com/gotchas-and-common-mistakes-in-go-golang/index.html#opening_braces
+
+package main
+
+import "fmt"
+
+func main() {
+	s1 := []int{1, 2, 3}
+	fmt.Println(len(s1), cap(s1), s1) //prints 3 3 [1 2 3]
+
+	s2 := s1[1:]
+	fmt.Println(len(s2), cap(s2), s2) //prints 2 2 [2 3]
+
+	for i := range s2 {
+		s2[i] += 20
+	}
+
+	//still referencing the same array
+	fmt.Println(s1) //prints [1 22 23]
+	fmt.Println(s2) //prints [22 23]
+
+	s2 = append(s2, 4) //超过了原slice容量，重新分配一块内存空间
+
+	fmt.Println("s1 cap:", cap(s2))
+	for i := range s2 {
+		s2[i] += 10 //此时操作与s1 没有关系啦，不再指向同一个底层数组
+	}
+
+	//s1 is now "stale"
+	fmt.Println(s1) //prints [1 22 23]
+	fmt.Println(s2) //prints [32 33 14]
+}
