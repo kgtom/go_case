@@ -1,0 +1,40 @@
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	fmt.Printf("f1()...%d \n", f1())
+	fmt.Printf("f2()...%d \n", f2())
+	f3()
+
+}
+func f1() (i int) {
+	//defer中变量的值在defer表达式被定义时就确定了而不是执行的时候确定
+	i = 1
+	defer fmt.Println("defer =>", func() int {
+		fmt.Printf("defer i ..%d \n", i)
+		return i
+	}())
+	i++
+	return i
+}
+func f2() (r int) {
+	//defer中可以修改函数中的命名返回值
+	defer func(r int) {
+
+		r = r + 5
+		fmt.Printf("f2() defer r...%d \n", r)
+	}(r)
+	fmt.Printf("f2() end r...%d \n", r)
+	return r
+}
+
+//defer调用顺序是按照先进后出的方式(stack的结构)
+func f3() {
+	defer fmt.Print(1)
+	defer fmt.Print(2)
+	defer fmt.Print(3)
+	defer fmt.Print(4)
+}
