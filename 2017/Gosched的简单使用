@@ -1,0 +1,18 @@
+package main
+
+import "fmt"
+import "runtime"
+
+func main() {
+	done := false
+
+	go func() {
+		done = true
+		fmt.Print("go....")
+	}()
+
+	for !done {
+		runtime.Gosched() //挂起当前主goroutine,让开启的goroutine去执行
+	}
+	fmt.Println("done!")
+}
