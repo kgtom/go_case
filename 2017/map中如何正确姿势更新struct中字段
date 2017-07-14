@@ -1,0 +1,36 @@
+package main
+
+import "fmt"
+
+type data struct {
+	name string
+}
+
+func main() {
+	//m := map[string]data{"a": {"tom"}}
+	//m["a"].name = "lucy"  //error：struct data 不可寻址，不能更新
+	adjust_mapVal()
+	m := map[string]*data{"a": {"tom"}}
+
+	m["a"].name = "lucy" //可修改 因为 *data
+	//m["b"].name = "lilei" //error :invalid memory address or nil pointer dereference
+	fmt.Println(m["a"])
+
+	//slice 元素可以寻址
+	s := []data{{"tom"}}
+	s[0].name = "jim" //ok
+	fmt.Println(s)    //prints: [{two}]
+
+	m1 := map[string]int{"m": 1}
+	m1["m"] = 2 //可以任意修改
+	fmt.Print(m1)
+}
+
+//针对 struct data 不能修改其元素值，我们也可以使用临时变量的思路去解决，如下：
+func adjust_mapVal() {
+	m := map[string]data{"x": {"tom"}}
+	t := m["x"]
+	t.name = "jim"
+	m["x"] = t
+	fmt.Println("adjust...", m["x"])
+}
