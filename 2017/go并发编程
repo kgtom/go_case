@@ -1,0 +1,68 @@
+package main
+
+import (
+	"fmt"
+	"runtime"
+	"time"
+)
+
+func main() {
+	fmt.Println("main start")
+
+	//goroutine_0()// //hello world
+	//goroutine_1()//输出结果不正确
+	//goroutine_2()//保证正确输出
+	//runtime.Gosched()
+	goroutine_3() //使用channel同步机制,保证执行顺序输出
+
+	fmt.Println("main end")
+}
+func goroutine_0() {
+	go func() {
+
+		fmt.Println("hello world form goroutine")
+	}()
+	time.Sleep(1e9)
+	//让main goroutine暂停一1s,让goroutine有机会执行
+	//或者使用runtine.Gosched()暂停当前G,让其它G有机会运行
+}
+func goroutine_1() {
+	mySlice := []string{"tom", "lilei", "jim"}
+
+	for _, name := range mySlice {
+		go func() {
+			fmt.Println("name:", name)
+		}()
+		//执行输出3条记录结果：name:jim，因为for语句执行太快，执行到最后一个循环name=jim,然后
+		//go func()才得以执行，如何正确执行,解决见goroutine_2()
+	}
+}
+
+func goroutine_2() {
+
+	mySlice := []string{"tom", "lilei", "jim"}
+	for _, name := range mySlice {
+		go func(val string) {
+			fmt.Println("name:", val)
+		}(name)
+		runtime.Gosched()
+		//暂停一下当前G,让其它G得以执行，保证可以正确执行，但不能保证执行顺序
+		//若要保证执行顺序，这涉及到同步范畴，使用channel,解决见goroutine_3()
+	}
+}
+func goroutine_3() {
+	mySlice := []string{"tom", "lilei", "jim"}
+	ch := make(chan string)
+	for _, name := range mySlice {
+		go func(val string) {
+
+			//fmt.Println("sync name:", name)
+			ch <- name
+		}(name)
+
+		fmt.Println("sync name:", <-ch)
+		//<-ch //信号的作用
+
+	}
+
+}
