@@ -46,7 +46,7 @@ func ReceiveNsqMsq() {
 		wg.Add(-1)
 		return nil
 	}))
-	err := q.ConnectToNSQD("114.215.239.24:4150")
+	err := q.ConnectToNSQD("192.168.0.28:4150")
 	if err != nil {
 		log.Panic("Could not connect")
 	}
