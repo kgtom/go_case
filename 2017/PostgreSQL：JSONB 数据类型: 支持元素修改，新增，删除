@@ -1,0 +1,80 @@
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"log"
+
+	"github.com/go-xorm/xorm"
+	_ "github.com/lib/pq"
+)
+
+type Info struct {
+	Age  string `json:"age"  valid:"-"`
+	Addr string `json:"addr"  valid:"-"`
+}
+
+func main() {
+	userinfo := &Info{Age: "97", Addr: "jn"}
+	b, err := json.Marshal(userinfo)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(string(b))
+
+	var db *xorm.Engine
+
+	db, err = xorm.NewEngine("postgres", "host=127.0.0.1 user=tom password=tom123 dbname=t sslmode=disable")
+	if err != nil {
+		log.Fatal(err)
+	}
+	db.ShowSQL(true)
+	err = db.Ping()
+	if err != nil {
+		fmt.Println("db conn error")
+	}
+
+	Get(db)
+	fmt.Println("update info")
+
+	//方一 使用 9.5 版本支持 jsonb_set() 函数修改元素值。
+	// jsonb_set 函数语法
+	// jsonb_set(target jsonb, path text[], new_value jsonb[, create_missing boolean])
+	params := "'8'"
+	res, err := db.Exec(`UPDATE test
+    SET info = jsonb_set("info", '{"age"}', to_jsonb($1::text), false)
+	WHERE id = $2`, params, "1")
+
+	//方法二: 通过 jsonb || jsonb (concatenate / overwrite) 操作符
+	// || 操作符可以覆盖元素值，例如。
+	//select '{"name":"tom","age":"12"}'::jsonb || '{"age":"1832"}'::jsonb;
+
+	res, err = db.Exec(`UPDATE test
+    SET info =info||$1::jsonb
+	WHERE id = $2`, string(b), "1")
+	fmt.Println(res.RowsAffected())
+
+	Get(db)
+}
+func Get(db *xorm.Engine) {
+	t := new(Test)
+	id := 1
+	ok, err := db.Id(id).Get(t)
+	if err != nil {
+		fmt.Println("get error")
+	}
+	if ok {
+		fmt.Println("name:", t.Name, "info:", t.Info)
+	} else {
+		fmt.Println("not found row")
+	}
+}
+
+type Test struct {
+	Id   int64  `xorm:"pk autoincr BIGINT"`
+	Name string `xorm:"TEXT"`
+	Info string `xorm:"TEXT"`
+}
+
+//参考:http://francs3.blog.163.com/blog/static/4057672720157153719971/
