@@ -48,7 +48,8 @@ startretries=10
 stderr_logfile=/var/log/supervisor/test.stderr.log
 stdout_logfile=/var/log/supervisor/test.stdout.log
 
-ps:ngnix 配置文件放在 /etc/nginx文件夹内的 nginx.conf,在nginx文件夹内建立conf.d，放各个app配置文件，然后include在nginx.conf中
+ps:ngnix 配置文件放在 /etc/nginx文件夹内的 nginx.conf,在nginx文件夹内建立conf.d，放各个app配置文件，然后include在nginx.conf中.
+ 重启 ngnix: /usr/sbin/nginx -s reload
 
 举个例子：
 # supervisorctl  stop test
