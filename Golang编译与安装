@@ -38,6 +38,10 @@ Golang 部署：
  2.linux下，使用 supervisord 帮你把linux环境编译的二进制文件转成 daemon 程序。参数具体如下：
 
 ps:  supervisord 的配置文件放在 /etc/supervisord.d文件夹内
+ps： 上传的go 二进制文件，必须有可执行权限 
+查看权限：ls -l test
+增加可执行权限：chmod a+x test
+重启： supervisorctl  restart test
 
  [program:test]  ---守护进程名称
 command=/var/opt/app/test_centos ---执行的二进制文件
