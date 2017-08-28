@@ -1,0 +1,54 @@
+package main
+
+import (
+	"fmt"
+)
+
+type MyInt32 int32
+
+func IsBigEndian() bool {
+
+	var i int32 = 0x12345678
+
+	var b byte = byte(i)
+
+	if b == 0x12 {
+
+		return true
+
+	}
+
+	return false
+
+}
+
+func main() {
+
+	//两个类型的底层类型相同，在相互赋值时还是需要强制类型转换的
+	var myInt MyInt32 = MyInt32(5)
+
+	fmt.Println("myInt:", myInt)
+
+	//对于类型转换的截断问题，为了问题的简单化，这里只考虑具有相同底层类型之间的类型转换。
+	//小类型(这里指存储空间)向大类型转换时，通常都是安全的。
+	//下面是一个大类型向小类型转换的示例：
+	var gid int32 = 0x12345678
+	var uid int8 = int8(gid)
+
+	//说明您的机器是属于大端序存储。
+	fmt.Printf("uid=0x%02x, gid=0x%02x\n", uid, gid)
+
+	//自己机器 判断是属于大端序或小端序
+	if IsBigEndian() {
+
+		fmt.Println("大端序")
+
+	} else {
+
+		fmt.Println("小端序")
+
+	}
+
+}
+
+//reference:http://blog.csdn.net/kjfcpua/article/details/18667255
