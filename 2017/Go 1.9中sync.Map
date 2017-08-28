@@ -1,0 +1,44 @@
+//总结:
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+func main() {
+	list := map[string]interface{}{
+		"name":          "tom",
+		"birthday":      "1998年3月30日",
+		"age":           19,
+		"hobby":         []string{"听音乐", "看电影", "电视"},
+		"constellation": "白羊座",
+	}
+
+	var m sync.Map
+	for k, v := range list {
+		m.Store(k, v)
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		//更新或者新增一个entry。
+		m.Store("age", 22)
+		//如果提供的key存在，则返回已存在的值(Load)，否则保存提供的键值(Store)。
+		m.LoadOrStore("tag", 8888)
+		//删除一个键值
+		m.Delete("constellation")
+		wg.Done()
+	}()
+
+	wg.Wait()
+
+	m.Range(func(key, value interface{}) bool {
+		fmt.Println(key, value)
+		return true
+	})
+}
+
+// reference:https://zhuanlan.zhihu.com/p/27642824
+//https://segmentfault.com/a/1190000010294041
