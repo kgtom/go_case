@@ -1,0 +1,57 @@
+package main
+
+import (
+	"fmt"
+	"sync"
+	"time"
+)
+
+func main() {
+	//DoWithChannel() //使用channel
+	c := sync.NewCond(&sync.Mutex{})
+	var num int
+	for i := 1; i <= 2; i++ {
+		go func(id int) {
+			fmt.Println("lock id :", id)
+			c.L.Lock()
+			for num != 1 {
+				fmt.Println("wait  id :", id, "num :", num)
+				c.Wait() //符合num!=1条件，执行两个操作：堵塞当前线程 g1 g2，解锁num，(原子操作)
+			}
+			//以下代码不符合num!=1
+			fmt.Println("go num:", num)
+			num = 10 //此时得到通知的goroutine 获取到了 num 控制权，随意做操作。
+			fmt.Println("num op :", num, "id:", id)
+			c.L.Unlock() //随意操作后，记得解锁，然后退出
+			fmt.Println("unlocked id :", id)
+		}(i)
+	}
+	time.Sleep(time.Second)
+	fmt.Println("sleep one second")
+	num++ //19行c.wait() 堵塞了g1 g2,此时num=1
+	fmt.Println("main num:", num)
+	c.Signal()                  //通知g1 g2中的一个
+	time.Sleep(time.Second * 2) //暂停一下主线程，让g1 或g2 有机会唤醒并运行
+	fmt.Println("main exit")
+}
+
+//总结：
+//1.条件变量：条件发生变化时，通知被堵塞的线程,若没有条件，则一直轮询，造成cpu资源浪费。
+//2.如果你的服务是一直开着的，不间断，
+//如果等不到条件变量的改变通知，会持续新增goroutine,会出现内存溢出，导致进程结束，如何解决呢？
+//使用更加优雅的channel
+
+func DoWithChannel() {
+	quit := make(chan bool, 1) //尽量使用代缓冲区的，因为goroutine初始化需要时间
+	go func() {
+		select {
+		case <-quit:
+			fmt.Println("it is time to quit")
+		case <-time.After(time.Second):
+			fmt.Println("timeout，it is over")
+		}
+	}()
+	//time.Sleep(time.Second * 2) //测试超时后，执行第二个case 语句
+	quit <- true
+	//即使由于其它原因导致没有收到quit信号，也不会产生goroutine暴增，因为使用time超时机制
+}
