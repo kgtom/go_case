@@ -1,0 +1,50 @@
+关于Godep
+大型的golang项目都使用到godep作为包管理的工具，如k8s这种，都是使用的是godep来进行依赖管理操作。
+
+安装：
+godep 安装在GOPATH\bin目录下，如何使用godep 报找不到该命令，需要将此目录放到系统Path中。
+go getgithub.com/tools/godep
+ 
+编译和运行
+项目使用godep管理后，不再使用go run和go build，因为go命令是直接到GOPATH目录下去找第三方库。 而使用godep下载的依赖库放到 /vendor目录下的；
+
+ godep go run main.go
+    godep go build
+    godep go install
+    godep go test   
+ 
+godep save
+godep save将项目中使用到的第三方库复制到项目的Godeps目录下。
+
+ godep save能否成功执行需要有两个要素： 
+
+     1.当前或者需扫描的包均能够编译成功;                                                                                 2.依赖包必须使用了某个代码管理工具                                                                            （如git，hg),因为godep需要记录revision
+
+godep restore
+如果下载的项目中只有Godeps.json文件，而没有包含第三库则可以使用godep restore这个命令将所有的依赖库下来下来到GOPATH的src中。
+
+godep restore
+godep restore执行时，godep会按照Godeps/Godeps.json内列表，依次执行go get -d -v 来下载对应依赖包到GOPATH路径下，因此，如果某个原先的依赖包保存路径（GOPATH下的相对路径）与下载url路径不一致，比如kuberbetes在github上路径是github.com/kubernetes，而代码内import则是k8s.io，则会导致无法下载成功，也就是说godep restore不成功。这种只能手动，比如手动创建$GOPATH/k8s.io目录，然后git clone。
+
+golang自带包管理工具
+自带工具：go get go get可以将依赖的第三方库下载本GOPATH目录，在代码中直接import相应的代码库就可以了。 与godep相比，如果项目引用的第三方库没有列入到项目里面，安装项目时，针对第三方库需要使用go get一个个下载，比较麻烦；
+
+注：使用godep restore可能导致部分库无法下载下来；编译会报错： cmd/decode.go:16:2: cannot find package "github.com/CodisLabs/redis-port/pkg/libs/atomic2" in any of:
+
+此时针对报错的特定库再go get一般都能下载： go get github.com/CodisLabs/redis-port/pkg/libs/atomic2
+
+godep支持的命令
+
+save    list and copy dependencies into Godeps
+    go       run the go tool with saveddependencies
+    get      download and install packages withspecified                    dependencies
+    path     print GOPATH for dependency code
+    restore  check out listed dependency versions inGOPATH
+    update   update selected packages or the go version
+    diff     shows the diff between current andpreviously saved              set of dependencies
+    version  show version info
+ 
+
+reference：
+http://studygolang.com/articles/2147
+http://www.cnblogs.com/zuxingyu/p/6015715.html
