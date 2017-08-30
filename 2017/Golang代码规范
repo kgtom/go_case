@@ -1,0 +1,219 @@
+项目的目录结构尽量做到简明、层次清楚
+
+文件名 命名规范
+用小写，尽量见名思义，看见文件名就可以知道这个文件下的大概内容，对于源代码里的文件，文件名要很好的代表了一个模块实现的功能。个人习惯小驼峰式。
+
+命名规范
+包名
+包名用小写,使用短命名,尽量和标准库不要冲突
+
+
+
+接口名
+单个函数的接口名以”er”作为后缀，如Reader,Writer
+
+接口的实现则去掉“er”
+
+typeReaderinterface {
+    Read(p []byte) (n int, err error)
+}
+ 
+两个函数的接口名综合两个函数名
+
+typeWriteFlusherinterface {
+    Write([]byte) (int, error)
+    Flush() error
+}
+ 
+变量
+全局变量：采用驼峰命名法，仅限在包内的全局变量，包外引用需要写接口，提供调用。
+
+ 局部变量：驼峰式，小写字母开头
+
+ 
+myName:="tom"
+ 
+//全局变量也可也这样定义
+var (
+    a = 1
+    buint64 = 3
+    c =3.14
+    d := 4
+)
+ 
+常量
+常量：大写，采用下划线
+
+import 规范
+import在多行的情况下，goimports会自动帮你格式化。
+
+如果你的包引入了三种类型的包，标准库包，程序内部包，第三方包，建议采用如下方式进行组织你的包：
+import (
+    "encoding/json"
+    "strings"
+ 
+    "myproject/models"
+    "myproject/controller"
+    "git.obc.im/obc/utils"
+ 
+    "git.obc.im/dep/beego"
+    "git.obc.im/dep/mysql"
+)
+ 
+在项目中不要使用相对路径引入包：
+
+// 这是不好的导入
+
+import “../net”
+ 
+// 这是正确的做法
+
+import“xxxx.com/proj/net”
+ 
+函数名
+函数名采用驼峰命名法，尽量不要使用下划线
+
+错误处理
+error作为函数的值返回,必须尽快对error进行处理
+采用独立的错误流进行处理
+不要采用这种方式：
+
+if err != nil {
+    // errorhandling
+} else {
+    // normal code
+}
+ 
+而要采用下面的方式：
+
+if err != nil {
+    // errorhandling
+    return// or continue,etc.
+}
+// normal code
+ 
+如果返回值需要初始化，则采用下面的方式：
+
+x, err := f()
+if err != nil {
+    // error handling
+    return
+}
+// use x
+ 
+Panic
+在逻辑处理中禁用panic
+在main包中只有当实在不可运行的情况采用panic，例如文件无法打开，数据库无法连接导致程序无法 正常运行，但是对于其他的package对外的接口不能有panic，只能在包内采用。 建议在main包中使用log.Fatal来记录错误，这样就可以由log来结束程序。
+
+
+Recover
+recover用于捕获runtime的异常，禁止滥用recover，在开发测试阶段尽量不要用recover，recover一般放在你认为会有不可预期的异常的地方。
+
+funcserver(workChan <-chan *Work) {
+    forwork := range workChan {
+        gosafelyDo(work)
+    }
+}
+ 
+funcsafelyDo(work *Work) {
+    deferfunc() {
+        iferr := recover(); err != nil {
+            log.Println("workfailed:", err)
+        }
+    }()
+    // do 函数可能会有不可预期的异常
+    do(work)
+}
+ 
+Defer
+defer在函数return之前执行，对于一些资源的回收用defer是好的，但也禁止滥用defer，defer是需要消耗性能的,所以频繁调用的函数尽量不要使用defer。
+
+// Contentsreturns the file's contents as a string.
+funcContents(filename string) (string, error) {
+    f, err := os.Open(filename)
+    if err != nil {
+        return"", err
+    }
+    defer f.Close()  // f.Close will run when we're finished.
+ 
+    varresult []byte
+    buf := make([]byte, 100)
+    for {
+        n, err := f.Read(buf[0:])
+        result = append(result, buf[0:n]...) // append isdiscussed later.
+        if err != nil {
+            if err == io.EOF {
+                break
+            }
+            return"", err  // f will be closed if we return here.
+        }
+    }
+    returnstring(result), nil// f will beclosed if we return here.
+}
+ 
+控制结构
+if
+if接受初始化语句，约定如下方式建立局部变量：
+
+
+iferr := file.Chmod(0664); err != nil {
+    return err
+}
+ 
+for
+采用短声明建立局部变量：
+
+sum := 0
+fori := 0; i < 10; i++ {
+    sum += i
+}
+ 
+range
+如果只需要第一项（key），就丢弃第二个：
+
+forkey := range m {
+    if key.expired() {
+        delete(m, key)
+    }
+}
+ 
+return
+尽早return：一旦有错误发生，马上返回：
+
+f, err := os.Open(name)
+if err != nil {
+    return err
+}
+d, err := f.Stat()
+if err != nil {
+    f.Close()
+    return err
+}
+codeUsing(f, d)
+ 
+方法的接收器
+名称 一般采用strcut的第一个字母且为小写，而不是this，me或者self：
+
+typeTstruct{}
+func (p *T)Get(){}
+ 
+如果接收者是大的结构体或者数组，使用指针传递会更有效率：
+package main
+ 
+import (
+    "fmt"
+)
+ 
+typeTstruct {
+    data[1024]byte
+}
+ 
+func (t *T) Get() byte {
+    return t.data[0]
+}
+ 
+funcmain() {
+    t := new(T)
+    fmt.Println(t.Get())
+}
+ 
