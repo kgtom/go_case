@@ -1,0 +1,30 @@
+httptrace提供了在HTTP客户端请求中跟踪事件的机制。直接上代码：
+package main
+ 
+import (
+    "fmt"
+    "log"
+    "net/http"
+    "net/http/httptrace"
+)
+ 
+funcmain() {
+    req, _ := http.NewRequest("GET", "http://baidu.com", nil)
+    trace :=&httptrace.ClientTrace{
+        GotConn:func(connInfo httptrace.GotConnInfo) {
+            fmt.Printf("Got Conn:%+v\n", connInfo)
+        },
+        DNSDone:func(dnsInfo httptrace.DNSDoneInfo) {
+            fmt.Printf("DNS Info:%+v\n", dnsInfo)
+        },
+    }
+    req = req.WithContext(httptrace.WithClientTrace(req.Context(), trace))
+    _, err :=http.DefaultTransport.RoundTrip(req)
+    if err != nil {
+        log.Fatal(err)
+    }
+}
+ 
+ 
+
+更多信息参考:https://golang.org/pkg/net/http/httptrace/
