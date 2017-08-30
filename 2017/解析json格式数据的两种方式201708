@@ -1,0 +1,104 @@
+package main
+ 
+import (
+    "fmt"
+ 
+    "github.com/bitly/go-simplejson"
+)
+ 
+typeTestModelData []struct {
+    OneLevelstring`json:"one-level"`
+    TwoLevelstruct {
+        Astring`json:"a"`
+        Bstring`json:"b"`
+    }`json:"two-level"`
+    ThreeLevel[]struct {
+        Cstring`json:"c,omitempty"`
+        Dstring`json:"d,omitempty"`
+    }`json:"three-level"`
+}
+ 
+func main() {
+ 
+    bytesStr := []byte(`[
+  {
+    "one-level": "one",
+    "two-level": {
+      "a": "one-two-a-1",
+      "b": "one-two-b-1"
+    },
+    "three-level": [
+      {
+        "c":"one-three-c-1",
+        "d":"one-three-d-1"
+      },
+      {
+        "c":"one-three-c-2",
+        "d":"one-three-d-2"
+      }
+    ]
+  },
+  {
+    "one-level": "two",
+    "two-level": {
+      "a": "two-two-a-2",
+      "b": "two-two-b-2"
+    },
+    "three-level": [
+      {
+        "c":"two-three-c-1",
+        "d":"two-three-d-1"
+      },
+      {
+        "c": "two-three-c-2",
+        "d":"two-three-d-2"
+      }
+    ]
+  }
+]`)
+    //方法一：使用https://mholt.github.io/json-to-go/ 转化成go struct,然后Unmarshal
+    // retData :=TestModelData{}
+    //json.Unmarshal([]byte(bytesStr), &retData)
+    //fmt.Println("TestData:", retData)
+    //fmt.Println("TestData[0].OneLevel:", retData[0].OneLevel)
+ 
+    //方法er:使用 simplejson包，转换到interface，然后层级获取值
+    vardata, err = simplejson.NewJson(bytesStr)
+    if err != nil {
+        fmt.Println(err.Error())
+        return
+    }
+    fmt.Println("showdata:", data.MustArray())
+ 
+    arr := data.MustArray()
+    foridx, item := range arr {
+        m, ok := item.(map[string]interface{})
+        if !ok {
+            fmt.Println("Invalidtest one-level data")
+        }
+ 
+        fmt.Println("one-level:", m["one-level"])
+ 
+        two_data, ok := m["two-level"].(map[string]interface{})
+        if !ok {
+            fmt.Println("Invalidtest two-level data")
+            return
+        }
+        fmt.Println("two-level中b:", two_data["b"])
+ 
+        three_data, ok := m["three-level"].([]interface{})
+        if !ok {
+            fmt.Println("Invalidtest three-level data")
+            return
+        }
+        fmt.Println("three-level:",three_data[idx])
+ 
+        ifval, ok :=three_data[idx].(map[string]interface{}); ok {
+            fmt.Println("Ithree-level中的C:", val["c"])
+        }else {
+            fmt.Println("notfound:")
+        }
+ 
+    }
+ 
+}
