@@ -1,0 +1,17 @@
+一个简单的go 程序，编译后1.6M，网上找了一下对可执行文件的压缩。推荐使用 UPX。linux  mac win平台下都有，地址：https://github.com/upx/upx/releases
+本文以win平台为例，文章参考的链接mac平台。
+
+go build 发现2.5M  如图：
+
+此时：注意 可执行文件的权限。
+
+UPX运行并执行压缩：本文下载upx394w.zip
+
+
+压缩后文件变成799k:
+
+
+Go的二进制文件有时会比较大，因为Golang是静态编译的，打包编译后不依赖其它文件。
+
+reference:
+http://www.jianshu.com/p/cd3c766b893c
