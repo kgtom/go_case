@@ -1,0 +1,105 @@
+gracehttp:可以轻松构建可以正常终止和重新启动的套接字服务器（即不丢弃任何连接）。
+
+它为HTTP服务器提供了方便的API，包括对TLS的支持，特别是如果您需要监听多个端口（例如，仅限辅助内部管理服务器）。 此外，它使用与系统提供套接字激活兼容性相同的API来实现，也提供服务器的延迟激活。
+ 
+// Commandgracedemo implements a demo server showing how to gracefully
+// terminate anHTTP server using grace.
+package main
+ 
+import (
+    "flag"
+    "fmt"
+    "net/http"
+    "os"
+    "time"
+ 
+    "github.com/facebookgo/grace/gracehttp"
+)
+ 
+var (
+    address0 = flag.String("a0", ":801", "Zeroaddress to bind to.")
+    address1 = flag.String("a1", ":802", "Firstaddress to bind to.")
+    address2 = flag.String("a2", ":803", "Secondaddress to bind to.")
+    now      = time.Now()
+)
+ 
+funcmain() {
+    flag.Parse()
+    gracehttp.Serve(
+        &http.Server{Addr:*address0, Handler: newHandler("Zero  ")},
+        &http.Server{Addr:*address1, Handler: newHandler("First")},
+        &http.Server{Addr:*address2, Handler: newHandler("Second")},
+    )
+}
+ 
+funcnewHandler(name string) http.Handler {
+    mux := http.NewServeMux()
+    mux.HandleFunc("/sleep/", do())
+    return mux
+}
+func do (whttp.ResponseWriter, r *http.Request) {
+        duration, err := time.ParseDuration(r.FormValue("duration"))
+        if err != nil {
+            http.Error(w, err.Error(), 400)
+            return
+        }
+        time.Sleep(duration)
+        fmt.Fprintf(
+            w,
+            "%s startedat %s slept for %d nanoseconds from pid %d.\n",
+            name,
+            now,
+            duration.Nanoseconds(),
+            os.Getpid(),
+        )
+    }
+}
+ 
+
+详情：https://github.com/facebookgo/grace
+
+
+grace:beego的一块独立模块，使用方式：
+打开两个终端
+
+一个终端输入：ps -ef|grep 应用名
+
+一个终端输入请求：curl "http://127.0.0.1:8080/hello"
+
+热升级
+
+kill -HUP 进程 ID
+
+打开一个终端输入请求：curl "http://127.0.0.1:8080/?sleep=0"
+
+package main
+ 
+import (
+    "log"
+    "net/http"
+    "os"
+    "strconv"
+ 
+    "github.com/astaxie/beego/grace"
+)
+ 
+funchandler(whttp.ResponseWriter, r *http.Request) {
+    w.Write([]byte("look!"))
+    w.Write([]byte("ospid:" + strconv.Itoa(os.Getpid())))
+}
+ 
+funcmain() {
+    mux := http.NewServeMux()
+    mux.HandleFunc("/", handler)
+ 
+    err := grace.ListenAndServe("localhost:8080", mux)
+    if err != nil {
+        log.Println(err)
+    }
+    log.Println("Server on8080 stopped")
+    os.Exit(0)
+}
+ 
+
+
+详情：https://github.com/beego/beedoc/blob/master/zh-CN/module/grace.md
