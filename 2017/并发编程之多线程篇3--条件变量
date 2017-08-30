@@ -1,0 +1,55 @@
+Go标准库中sync.Cond类型代表条件变量。
+Cond提供了构造方法Cond.NewCond、通知方法Cond.Signal和Cond.Broadcast、等待方法Cond.Wait.
+
+Broadcast()函数通知所有等待在condition variable的goroutine
+
+Signal()函数只会通知其中的一个goroutine。
+
+Wait()会让goroutine阻塞在condition variable，等待条件成立。
+
+
+
+
+
+package main
+
+import (
+	"fmt"
+	"sync"
+	"time"
+)
+
+func main() {
+	c := sync.NewCond(&sync.Mutex{})
+	var num int
+
+	for i := 1; i <= 2; i++ {
+		go func(id int) {
+			fmt.Println(" Thread ID:", id)
+			c.L.Lock()
+			for num != 1 {
+				fmt.Println(" loop: Thread ID:", id)
+				c.Wait()
+				fmt.Println("end loop: Thread ID:", id)
+			}
+			num++
+			c.L.Unlock()
+			fmt.Println("end Thread ID:", id)
+		}(i)
+	}
+
+	time.Sleep(time.Second)
+	fmt.Println("wait one second")
+
+	num++
+	c.Signal()
+	time.Sleep(time.Second)
+	fmt.Println("go exit")
+}
+　
+
+条件变量适合用于只对一个或多个临界区进行保护的时候，轻量级的。
+
+下一节介绍如何使用channel 替换条件变量。
+
+参考：http://nanxiao.me/golang-condition-variable/
