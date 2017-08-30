@@ -1,0 +1,31 @@
+//总结:package之 github.com/fatih/structs :convert a struct into a map[string]interface{}
+package main
+
+import (
+	"fmt"
+	"net/http"
+
+	"github.com/fatih/structs"
+)
+
+type Server struct {
+	Name        string `json:"name,omitempty"`
+	ID          int
+	Enabled     bool
+	users       []string // not exported
+	http.Server          // embedded
+}
+
+func main() {
+
+	server := &Server{
+		Name:    "gopher",
+		ID:      123456,
+		Enabled: true,
+	}
+	m := structs.Map(server)
+	for k, v := range m {
+		fmt.Printf("key:%v val:%v \n", k, v)
+	}
+
+}
