@@ -1,0 +1,27 @@
+//总结: cron 按照约定的时间，定时的执行特定的任务job,实现的 cron 可以精确到秒
+package main
+
+import (
+	"log"
+
+	"github.com/robfig/cron"
+)
+
+var i = 0
+
+func main() {
+
+	c := cron.New()
+	spec := "0/3 * * * * ?" //3s
+	c.AddFunc(spec, doWork)
+	c.Start()
+	select {} //阻塞主goroutine 不退出
+
+}
+func doWork() {
+	i++
+	log.Println("start", i)
+
+}
+
+//reference: https://github.com/robfig/cron
