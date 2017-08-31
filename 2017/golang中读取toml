@@ -1,0 +1,72 @@
+//总结:package之 github.com/BurntSushi/toml:读取配置文件的方式toml
+package main
+ 
+import (
+    "fmt"
+    "io/ioutil"
+    "os"
+    "github.com/BurntSushi/toml"
+)
+// person
+type Person struct {
+    ID uint32
+    Sex bool
+    Name string
+    Weight float32
+    Friend *Friends
+    Books []string
+}
+// friends
+type Friends struct {
+    Age int
+    Name string
+}
+func ReadConf(fname string) (p *Person, err error) {
+    var (
+        fp *os.File
+        fcontent []byte
+    )
+    p = new(Person) // &Person{}
+    if fp, err = os.Open(fname); err != nil {
+        fmt.Println("open error ", err)
+        return
+    }
+    if fcontent, err = ioutil.ReadAll(fp); err != nil {
+        fmt.Println("ReadAll error ", err)
+        return
+    }
+    if err = toml.Unmarshal(fcontent, p); err != nil {
+        fmt.Println("toml.Unmarshal error ", err)
+        return
+    }
+    return
+}
+func main() {
+    p, err := ReadConf("./conf.toml")
+    if err != nil {
+        fmt.Println(err)
+    }
+    fmt.Println(*p)
+    fmt.Println(*p.Friend)
+}
+ 
+ 
+
+配置文件:
+ #id  
+ID = 1  
+# name  
+Name = "name1"  
+# weight  
+Weight = 1.7  
+# books  
+Books = ["a", "b", "c"]  
+Sex = true    
+#friend Friend都可以  
+[friend]  
+Age = 32  
+Name = "xio"  
+
+
+reference:
+http://blog.csdn.net/lsyyff23/article/details/55100261
