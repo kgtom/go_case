@@ -1,0 +1,100 @@
+/*
+test xorm trans NewSession
+ */
+
+package main
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/go-xorm/xorm"
+	_ "github.com/lib/pq"
+)
+
+type A struct {
+	Id   int    `xorm:"not null pk INTEGER"`
+	Age  int    `xorm:"INTEGER"`
+	Addr string `xorm:"TEXT"`
+}
+type B struct {
+	Id int `xorm:"not null pk INTEGER"`
+
+	Name string `xorm:"TEXT"`
+}
+
+var db *xorm.Engine
+var session = db.NewSession()
+
+var t = 1
+
+func main() {
+
+	fmt.Print(t)
+	t = 2
+	fmt.Print(t)
+
+	t := 3
+	fmt.Print(t)
+	var err error
+	db, err = xorm.NewEngine("postgres", "host=127.0.0.1 user=smw password=fs2017 dbname=test sslmode=disable")
+	if err != nil {
+		log.Fatal(err)
+	}
+	db.ShowSQL(true)
+	err = db.Ping()
+	if err != nil {
+		fmt.Println("db conn error")
+	}
+
+	ok, err := TestTrans()
+	if err != nil || !ok {
+		fmt.Println(" no")
+	}
+}
+
+func TestTrans() (bool, error) {
+	fmt.Print(t)
+	session = db.NewSession()
+	defer session.Close()
+	// add Begin() before any action
+	err := session.Begin()
+
+	a := &A{
+		Id:   1,
+		Age:  10,
+		Addr: "bj",
+	}
+	i, err := session.Insert(a)
+	if err != nil || i == 0 {
+		session.Rollback()
+		fmt.Println("a  err", err.Error())
+	}
+
+	//
+	ret := addB()
+	if !ret {
+		session.Rollback()
+		return false, err
+	}
+	// add Commit() after all actions
+	err = session.Commit()
+	if err != nil {
+		return false, err
+	}
+	return true, err
+}
+
+func addB() bool {
+	b := &B{
+		Id:   3,
+		Name: "tom",
+	}
+	i, err := session.Insert(b)
+	if err != nil || i > 0 {
+		//session.Rollback()
+		fmt.Println("b  err", err)
+		return false
+	}
+	return true
+}
