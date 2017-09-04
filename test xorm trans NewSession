@@ -1,6 +1,6 @@
 /*
 test xorm trans NewSession
- */
+*/
 
 package main
 
@@ -37,7 +37,7 @@ func main() {
 	t := 3
 	fmt.Print(t)
 	var err error
-	db, err = xorm.NewEngine("postgres", "host=127.0.0.1 user=smw password=fs2017 dbname=test sslmode=disable")
+	db, err = xorm.NewEngine("postgres", "host=127.0.0.1 user=tom password=abc123 dbname=test sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -91,8 +91,8 @@ func addB() bool {
 		Name: "tom",
 	}
 	i, err := session.Insert(b)
-	if err != nil || i > 0 {
-		//session.Rollback()
+	if err != nil || i == 0 {
+		session.Rollback()
 		fmt.Println("b  err", err)
 		return false
 	}
