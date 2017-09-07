@@ -1,0 +1,21 @@
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func main() {
+	slice := []string{"a", "b", "c"}
+	fmt.Println(slice)
+	slice = append(slice, "d")
+	fmt.Println(strings.Join(slice, ",")) //切片转成字符串拼接吗
+
+	//指定位置插入一个元素，需要借助使用一个slice 保存后半部分，然后再组合
+	rear := append([]string{}, slice[2:]...)
+	fmt.Println("rear:", rear)
+	slice = append(slice[0:2], "inserted")
+	fmt.Println("slice app:", slice)
+	slice = append(slice, rear...)
+	fmt.Println("after insert", slice)
+}
