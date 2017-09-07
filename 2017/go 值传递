@@ -1,0 +1,42 @@
+//Go 中不存在引用传递，所有的参数传递都是值传递。
+package main
+
+import "fmt"
+
+func main() {
+	var m map[int]int
+	fmt.Println("m1:", m) //map[]
+	fn(m)
+	fmt.Println("m1->:", m)
+	//m[1] = 1 //assignment to entry in nil map，未make初始化不能赋值, 没有申请内存地址
+	fmt.Println(m == nil) //true
+
+	var m2 = make(map[int]int)
+	fmt.Println("m2:", m2)
+	fn2(m2) //
+
+	fmt.Println("m2->:", m2) //[1:100 2:200]
+
+	m3 := make(map[int]int)
+	fmt.Println("m3", m3)
+	fn3(m3)
+	fmt.Println("m3->", m3)
+
+}
+func fn3(m map[int]int) {
+	m[3] = 3
+}
+func fn(m map[int]int) {
+	//重新申请一个内存，这里m变化不影响main()中m的值
+	m = make(map[int]int)
+	m[1] = 100
+	m[2] = 200
+	fmt.Println(m) // map[1:100 2:200]
+}
+
+func fn2(m map[int]int) {
+	//值传递，同一块内存地址，地址拷贝了一份给了m, m变化则也会改变main()中m2
+	m[1] = 100
+	m[2] = 200
+	fmt.Println("fn2:", m) //[1:100 2:200]
+}
