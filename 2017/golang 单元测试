@@ -1,0 +1,17 @@
+package main
+
+import (
+	"fmt"
+	"testing"
+)
+
+func Test_Print(t *testing.T) {
+
+	g := GetGuid()
+	fmt.Println(g)
+	t.Log("第一个测试通过了")
+}
+
+//测试某一个方法:go test -v -test.run Test_String
+
+//测试某一个文件:  go test -v user_test.go  main.go ,必须标注源文件
