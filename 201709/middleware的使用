@@ -1,0 +1,75 @@
+本届将展示如何在Go中创建中间件方法。
+中间件本身简单地将http.HandlerFunc作为其参数之一，将其包装并返回一个新的http.HandlerFunc，以供服务器调用。
+
+package main
+ 
+import (
+    "fmt"
+    "log"
+    "net/http"
+    "time"
+)
+ 
+typeMiddlewarefunc(http.HandlerFunc)http.HandlerFunc
+ 
+// Logging logsall requests with its path and the time it took to process
+funcLogging() Middleware {
+ 
+    // Create a newMiddleware
+    returnfunc(fhttp.HandlerFunc) http.HandlerFunc {
+ 
+        // Define thehttp.HandlerFunc
+        returnfunc(w http.ResponseWriter,r *http.Request) {
+ 
+            // Do middlewarethings
+            start := time.Now()
+            deferfunc() {
+                log.Println(r.URL.Path,time.Since(start))
+ 
+            }()
+ 
+            // Call the nextmiddleware/handler in chain
+            f(w, r)
+        }
+    }
+}
+ 
+// Methodensures that url can only be requested with a specific method, else returns a400 Bad Request
+funcMethod(m string) Middleware {
+ 
+    // Create a newMiddleware
+    returnfunc(fhttp.HandlerFunc) http.HandlerFunc {
+ 
+        // Define thehttp.HandlerFunc
+        returnfunc(whttp.ResponseWriter, r *http.Request) {
+ 
+            // Do middlewarethings
+            if r.Method != m {
+                http.Error(w, http.StatusText(http.StatusBadRequest),http.StatusBadRequest)
+                return
+            }
+ 
+            // Call the nextmiddleware/handler in chain
+            f(w, r)
+        }
+    }
+}
+ 
+// Chain appliesmiddlewares to a http.HandlerFunc
+funcChain(fhttp.HandlerFunc, middlewares ...Middleware) http.HandlerFunc {
+    for_, m := range middlewares {
+        f = m(f)
+    }
+    return f
+}
+ 
+funcHello(whttp.ResponseWriter, r *http.Request) {
+    fmt.Fprintln(w, "helloworld")
+}
+ 
+funcmain() {
+    http.HandleFunc("/", Chain(Hello, Method("GET"), Logging()))
+    http.ListenAndServe(":8080", nil)
+}
+
+reference:https://gowebexamples.com/advanced-middleware/
