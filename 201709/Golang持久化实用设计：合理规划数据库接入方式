@@ -1,0 +1,564 @@
+此篇文章转自Alex Edwards的Practical Persistence in Go: Organising Database Access，原文地址http://www.alexedwards.net/blog/organising-database-access。
+
+在涉及到HTTP服务接入数据库的问题上，不同的人会给出不一样的答案：一些人会推荐依赖注入方式，另一些人会建议简单粗暴的使用全局变量，还有一些会将连接池嵌入到x/net/context中。
+
+但是据我自己的经验来讲，应当根据项目需求选择不同的方式。这里面涉及到的问题有工程的架构和规模大小，软件测试方式和工程的规划方向，所有的这些因素都会影响你选择数据库接入的方式。
+
+在这里我简要概述始终不同的代码结构以及数据库接入方式。
+
+Global variables
+
+全局变量是我们第一种选择，这种方式简单、直接，直接设置一个指向数据库连接池的指针为全局变量。
+
+为了保持代码的整洁和简练，有时我们使用初始化函数以便数据库连接服务可以在其他包完成工作。
+
+我比较喜欢拿代码说事，所以我们拿一个在线图书商店的的工程示例。示例使用使用MVC框架来进行HTTP服务的处理，工程包括main包和models包，models包含DB全局变量、InitDB()函数以及我们的数据库业务逻辑。
+
+bookstore
+
+├── main.go
+
+└── models
+
+  ├── books.go
+
+  └── db.go
+File: main.go
+
+package main
+
+import (
+    "bookstore/models"
+    "fmt"
+    "net/http"
+)
+
+func main() {
+    models.InitDB("postgres://user:pass@localhost/bookstore")
+
+    http.HandleFunc("/books", booksIndex)
+    http.ListenAndServe(":3000", nil)
+}
+
+func booksIndex(w http.ResponseWriter, r *http.Request) {
+    if r.Method != "GET" {
+        http.Error(w, http.StatusText(405), 405)
+        return
+    }
+    bks, err := models.AllBooks()
+    if err != nil {
+        http.Error(w, http.StatusText(500), 500)
+        return
+    }
+    for _, bk := range bks {
+        fmt.Fprintf(w, "%s, %s, %s, £%.2f\n", bk.Isbn, bk.Title, bk.Author, bk.Price)
+    }
+}
+File: models/db.go
+
+package models
+
+import (
+    "database/sql"
+    _ "github.com/lib/pq"
+    "log"
+)
+
+var db *sql.DB
+
+func InitDB(dataSourceName string) {
+    var err error
+    db, err = sql.Open("postgres", dataSourceName)
+    if err != nil {
+        log.Panic(err)
+    }
+
+    if err = db.Ping(); err != nil {
+        log.Panic(err)
+    }
+}
+File: models/books.go
+
+package models
+
+type Book struct {
+    Isbn   string
+    Title  string
+    Author string
+    Price  float32
+}
+
+func AllBooks() ([]*Book, error) {
+    rows, err := db.Query("SELECT * FROM books")
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+
+    bks := make([]*Book, 0)
+    for rows.Next() {
+        bk := new(Book)
+        err := rows.Scan(&bk.Isbn, &bk.Title, &bk.Author, &bk.Price)
+        if err != nil {
+            return nil, err
+        }
+        bks = append(bks, bk)
+    }
+    if err = rows.Err(); err != nil {
+        return nil, err
+    }
+    return bks, nil
+}
+如果你执行程序并且构建一个请求到/books，应该会得到一个类似下面的响应：
+
+$ curl -i localhost:3000/books
+
+HTTP/1.1 200 OK
+
+Content-Length: 205
+
+Content-Type: text/plain; charset=utf-8
+
+978-1503261969, Emma, Jayne Austen, £9.44
+
+978-1505255607, The Time Machine, H. G. Wells, £5.99
+
+978-1503379640, The Prince, Niccolò Machiavelli, £6.99
+
+使用全局变量方式，适用于以下情况：
+
+所有的数据库业务逻辑包含在一个包中。
+程序的规模小、头脑中能够清晰构建出业务逻辑。
+程序测试方法不需要mock数据库实例。
+上例中我们使用全局变量效果还OK，但是在更加复杂数据库业务逻辑的程序中就会显得力不从心了。一个可选的方式是多次调用InitDB函数，这样会导致程序代码的碎片化（很容易忘记初始化一个数据库连接，使得运行时得到一个nil指针）。第二种可选方式是创建一个config包，用于管理数据库连接的初始化和管理工作。
+
+Dependency injection
+
+第二种方式就是我们将要看到的依赖注入方式，在下面这个例子中，我们传递一个连接指针到HTTP处理函数处理数据库的业务逻辑。
+
+在现实的应用程序中，可能存在一个并行的程序需要接入，例如logger、template cache和数据库连接等。
+
+到目前为止，在线图书超市中，我们处理函数都位于一个包中，一个优雅的方式是将这些变量都嵌入到Env类型中
+
+type Env struct {
+    db *sql.DB
+    logger *log.Logger
+    templates *template.Template
+}
+接下来可以定义你自己的处理函数，处理函数的receiver是Env类型。这种方式是处理数据库连接的一种简洁常用的方式。
+
+File: main.go
+
+package main
+
+import (
+    "bookstore/models"
+    "database/sql"
+    "fmt"
+    "log"
+    "net/http"
+)
+
+type Env struct {
+    db *sql.DB
+}
+
+func main() {
+    db, err := models.NewDB("postgres://user:pass@localhost/bookstore")
+    if err != nil {
+        log.Panic(err)
+    }
+    env := &Env{db: db}
+
+    http.HandleFunc("/books", env.booksIndex)
+    http.ListenAndServe(":3000", nil)
+}
+
+func (env *Env) booksIndex(w http.ResponseWriter, r *http.Request) {
+    if r.Method != "GET" {
+        http.Error(w, http.StatusText(405), 405)
+        return
+    }
+    bks, err := models.AllBooks(env.db)
+    if err != nil {
+        http.Error(w, http.StatusText(500), 500)
+        return
+    }
+    for _, bk := range bks {
+        fmt.Fprintf(w, "%s, %s, %s, £%.2f\n", bk.Isbn, bk.Title, bk.Author, bk.Price)
+    }
+}
+File: models/db.go
+
+package models
+
+import (
+    "database/sql"
+    _ "github.com/lib/pq"
+)
+
+func NewDB(dataSourceName string) (*sql.DB, error) {
+    db, err := sql.Open("postgres", dataSourceName)
+    if err != nil {
+        return nil, err
+    }
+    if err = db.Ping(); err != nil {
+        return nil, err
+    }
+    return db, nil
+}
+File: models/books.go
+
+package models
+
+import "database/sql"
+
+type Book struct {
+    Isbn   string
+    Title  string
+    Author string
+    Price  float32
+}
+
+func AllBooks(db *sql.DB) ([]*Book, error) {
+    rows, err := db.Query("SELECT * FROM books")
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+
+    bks := make([]*Book, 0)
+    for rows.Next() {
+        bk := new(Book)
+        err := rows.Scan(&bk.Isbn, &bk.Title, &bk.Author, &bk.Price)
+        if err != nil {
+            return nil, err
+        }
+        bks = append(bks, bk)
+    }
+    if err = rows.Err(); err != nil {
+        return nil, err
+    }
+    return bks, nil
+}
+Or using a closure…
+
+另外一个可选的方式是将Env类型封装到你的业务处理逻辑中：
+
+File: main.go
+
+package main
+
+import (
+    "bookstore/models"
+    "database/sql"
+    "fmt"
+    "log"
+    "net/http"
+)
+
+type Env struct {
+    db *sql.DB
+}
+
+func main() {
+    db, err := models.NewDB("postgres://user:pass@localhost/bookstore")
+    if err != nil {
+        log.Panic(err)
+    }
+    env := &Env{db: db}
+
+    http.Handle("/books", booksIndex(env))
+    http.ListenAndServe(":3000", nil)
+}
+
+func booksIndex(env *Env) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        if r.Method != "GET" {
+            http.Error(w, http.StatusText(405), 405)
+            return
+        }
+        bks, err := models.AllBooks(env.db)
+        if err != nil {
+            http.Error(w, http.StatusText(500), 500)
+            return
+        }
+        for _, bk := range bks {
+            fmt.Fprintf(w, "%s, %s, %s, £%.2f\n", bk.Isbn, bk.Title, bk.Author, bk.Price)
+        }
+    })
+}
+依赖注入在以下情况下是一个比较好的选择：
+
+所有的处理函数都位于一个包中
+所有的处理函数的依赖有一个共性的集合
+程序测试方法不需要mock数据库实例
+Using an interface
+
+我们可以进一步探讨一下依赖注入的方式。改变一下models包以使models包输出DB类型（包含*sql.DB），并且实现了基本的数据库业务逻辑。
+
+这种处理方式的优点有两个：一方面可以使代码的架构整洁，另一方面尤为重要的是可以在程序测试中mock数据库实例。
+
+让我们修正一下上面的例子，增加一个Datastore的接口，接口实现了上例DB类型的处理函数。
+
+type Datastore interface {
+    AllBooks() ([]*Book, error)
+}
+我们可以使用这种接口类型来替换DB类型，以下是改写后的代码：
+
+File: main.go
+
+package main
+
+import (
+    "fmt"
+    "log"
+    "net/http"
+    "bookstore/models"
+)
+
+type Env struct {
+    db models.Datastore
+}
+
+func main() {
+    db, err := models.NewDB("postgres://user:pass@localhost/bookstore")
+    if err != nil {
+        log.Panic(err)
+    }
+
+    env := &Env{db}
+
+    http.HandleFunc("/books", env.booksIndex)
+    http.ListenAndServe(":3000", nil)
+}
+
+func (env *Env) booksIndex(w http.ResponseWriter, r *http.Request) {
+    if r.Method != "GET" {
+        http.Error(w, http.StatusText(405), 405)
+        return
+    }
+    bks, err := env.db.AllBooks()
+    if err != nil {
+        http.Error(w, http.StatusText(500), 500)
+        return
+    }
+    for _, bk := range bks {
+        fmt.Fprintf(w, "%s, %s, %s, £%.2f\n", bk.Isbn, bk.Title, bk.Author, bk.Price)
+    }
+}
+File: models/db.go
+
+package models
+
+import (
+    _ "github.com/lib/pq"
+    "database/sql"
+)
+
+type Datastore interface {
+    AllBooks() ([]*Book, error)
+}
+
+type DB struct {
+    *sql.DB
+}
+
+func NewDB(dataSourceName string) (*DB, error) {
+    db, err := sql.Open("postgres", dataSourceName)
+    if err != nil {
+        return nil, err
+    }
+    if err = db.Ping(); err != nil {
+        return nil, err
+    }
+    return &DB{db}, nil
+}
+File: models/books.go
+
+package models
+
+type Book struct {
+    Isbn   string
+    Title  string
+    Author string
+    Price  float32
+}
+
+func (db *DB) AllBooks() ([]*Book, error) {
+    rows, err := db.Query("SELECT * FROM books")
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+
+    bks := make([]*Book, 0)
+    for rows.Next() {
+        bk := new(Book)
+        err := rows.Scan(&bk.Isbn, &bk.Title, &bk.Author, &bk.Price)
+        if err != nil {
+            return nil, err
+        }
+        bks = append(bks, bk)
+    }
+    if err = rows.Err(); err != nil {
+        return nil, err
+    }
+    return bks, nil
+}
+由于我们现在的处理函数使用Datastore接口类型，所以可以很容易的在单元测试中mock数据库实例：
+
+package main
+
+import (
+    "bookstore/models"
+    "net/http"
+    "net/http/httptest"
+    "testing"
+)
+
+type mockDB struct{}
+
+func (mdb *mockDB) AllBooks() ([]*models.Book, error) {
+    bks := make([]*models.Book, 0)
+    bks = append(bks, &models.Book{"978-1503261969", "Emma", "Jayne Austen", 9.44})
+    bks = append(bks, &models.Book{"978-1505255607", "The Time Machine", "H. G. Wells", 5.99})
+    return bks, nil
+}
+
+func TestBooksIndex(t *testing.T) {
+    rec := httptest.NewRecorder()
+    req, _ := http.NewRequest("GET", "/books", nil)
+
+    env := Env{db: &mockDB{}}
+    http.HandlerFunc(env.booksIndex).ServeHTTP(rec, req)
+
+    expected := "978-1503261969, Emma, Jayne Austen, £9.44\n978-1505255607, The Time Machine, H. G. Wells, £5.99\n"
+    if expected != rec.Body.String() {
+        t.Errorf("\n...expected = %v\n...obtained = %v", expected, rec.Body.String())
+    }
+}
+*Request-scoped context
+
+最后让我们看一下请求上下文来存储和传递数据库连接，我们将使用 x/net/context 包。我们最后修改一下在线图书超市，传递context.Context给我们的处理函数。
+
+File: main.go
+
+package main
+
+import (
+  "bookstore/models"
+  "fmt"
+  "golang.org/x/net/context"
+  "log"
+  "net/http"
+)
+
+type ContextHandler interface {
+  ServeHTTPContext(context.Context, http.ResponseWriter, *http.Request)
+}
+
+type ContextHandlerFunc func(context.Context, http.ResponseWriter, *http.Request)
+
+func (h ContextHandlerFunc) ServeHTTPContext(ctx context.Context, rw http.ResponseWriter, req *http.Request) {
+  h(ctx, rw, req)
+}
+
+type ContextAdapter struct {
+  ctx     context.Context
+  handler ContextHandler
+}
+
+func (ca *ContextAdapter) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+  ca.handler.ServeHTTPContext(ca.ctx, rw, req)
+}
+
+func main() {
+  db, err := models.NewDB("postgres://user:pass@localhost/bookstore")
+  if err != nil {
+    log.Panic(err)
+  }
+  ctx := context.WithValue(context.Background(), "db", db)
+
+  http.Handle("/books", &ContextAdapter{ctx, ContextHandlerFunc(booksIndex)})
+  http.ListenAndServe(":3000", nil)
+}
+
+func booksIndex(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+  if r.Method != "GET" {
+    http.Error(w, http.StatusText(405), 405)
+    return
+  }
+  bks, err := models.AllBooks(ctx)
+  if err != nil {
+    http.Error(w, http.StatusText(500), 500)
+    return
+  }
+  for _, bk := range bks {
+    fmt.Fprintf(w, "%s, %s, %s, £%.2f\n", bk.Isbn, bk.Title, bk.Author, bk.Price)
+  }
+}
+File: models/db.go
+
+package models
+
+import (
+    "database/sql"
+    _ "github.com/lib/pq"
+)
+
+func NewDB(dataSourceName string) (*sql.DB, error) {
+    db, err := sql.Open("postgres", dataSourceName)
+    if err != nil {
+        return nil, err
+    }
+    if err = db.Ping(); err != nil {
+        return nil, err
+    }
+    return db, nil
+}
+File: models/books.go
+
+package models
+
+import (
+    "database/sql"
+    "errors"
+    "golang.org/x/net/context"
+)
+
+type Book struct {
+    Isbn   string
+    Title  string
+    Author string
+    Price  float32
+}
+
+func AllBooks(ctx context.Context) ([]*Book, error) {
+    db, ok := ctx.Value("db").(*sql.DB)
+    if !ok {
+        return nil, errors.New("models: could not get database connection pool from context")
+    }
+
+    rows, err := db.Query("SELECT * FROM books")
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+
+    bks := make([]*Book, 0)
+    for rows.Next() {
+        bk := new(Book)
+        err := rows.Scan(&bk.Isbn, &bk.Title, &bk.Author, &bk.Price)
+        if err != nil {
+            return nil, err
+        }
+        bks = append(bks, bk)
+    }
+    if err = rows.Err(); err != nil {
+        return nil, err
+    }
+    return bks, nil
+}
+
+reference：http://www.jianshu.com/p/65e10a5c9576
