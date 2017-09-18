@@ -1,0 +1,82 @@
+讲解这个问题前，首先要了解golang的并发机制。最重要了解goroutine启用多少完全由程序猿说了算。
+
+golang 两级线程模型：M 、P、 G 。
+
+M:N 则综合两种方式（N:1, 1:1）的优势。多个 goroutines 可以在多个 OS threads 上处理。既能快速切换上下文，也能利用多核的优势。
+
+M:一个新的M被创建后，Go运行时会先启动一个引导程序，初始化调度器的时候，对M最大数量进行设置 10000。这是初始值，也就是说最多有1000个内核线程服务于Go程序。请注意这是理想状态。
+
+  除了初始化设置，可以标准库代码包runtime/debug中SetMaxthreads函数设置最大值。
+
+  需要注意：SetMaxThreads设置的数量如果比当前小，会引发panic，所以要早设置最好。
+
+P:  runtime.GOMAXPROCX设置p的最大数量。p的最大数量实际上是对程序中并发运行go规模的一种限制。p的最大数量即为可运行G的队列的数量。一个G的启用，会被追加到某个p的可运行队列中，以等待p 关联上m才能有机会运行。
+
+ 设置P的最大数量，只能现在p的数量，而对G 和M没有任何约束。
+
+G:go关键字实际是递送并发任务的方法。启用多少个goroutine是由程序猿决定的。其实 goroutine 用到的就是线程池的技术，当 goroutine 需要执行时，会从 thread pool 中选出一个可用的 M 或者新建一个 M。而 thread pool 中如何选取线程，扩建线程，回收线程，Go Scheduler 进行了封装，对程序透明，只管调用就行，从而简化了 thread pool 的使用
+
+channel: 不带缓冲区channel是同步操作；带缓冲channel 决定了同时有多少个goroutine一起工作，充分利用cup多核。区别与python的 coroutine只能利用单核。
+
+demo1 使用time.Sleep 让所有goroutine都执行完毕，这种方式在测试中使用可以，生产环境中使用demo2:
+package main
+ 
+import (
+    "fmt"
+    "time"
+)
+ 
+funcmain() {
+ 
+    ch := make(chanstruct{}, 5) //带有缓冲的通道则是用来控制并发数，并发数达到阈值的时候阻塞
+    fori := 0; i < 10; i++ {
+        ch<- struct{}{}
+        godowork(i, ch)
+    }
+    time.Sleep(1e9) //等待所有的goroutine都执行完毕
+}
+ 
+funcdowork(idx int, ch chanstruct{}) {
+    //time.Sleep(1 *time.Second) //保证当前dowork有机会执行
+    fmt.Println("dowork idx:", idx)
+    <-ch//释放一个，然后才能有新的goroutine运行
+}
+ 
+ 
+
+demo2 使用wg 保证每一个goroutine都执行完毕
+package main
+ 
+import (
+    "fmt"
+    "sync"
+)
+ 
+funcmain() {
+ 
+    wg :=&sync.WaitGroup{}      //sync.WaitGroup 用于同步操作，也可以用于控制main routine等待所有子routine完成
+    ch := make(chanstruct{}, 5) //带有缓冲的通道则是用来控制并发数，并发数达到阈值的时候阻塞
+    fori := 0; i < 10; i++ {
+        ch<- struct{}{}
+        godowork(i, ch, wg)
+        wg.Add(1)
+    }
+    wg.Wait() //等待所的goroutine都执行完毕
+ 
+}
+ 
+funcdowork(idx int, ch chanstruct{}, wg*sync.WaitGroup) {
+    defer wg.Done()
+    fmt.Println("dowork idx:", idx)
+    <-ch//释放一个，然后才能有新的goroutine运行
+}
+ 
+ 
+
+
+
+reference:
+http://www.tianqi.com/news/156719.html
+郝大<go并发编程>
+https://www.zhihu.com/question/20862617/answer/117885063
+https://gocn.io/question/1145
