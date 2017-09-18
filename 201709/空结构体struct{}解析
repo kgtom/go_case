@@ -1,0 +1,133 @@
+本篇文章转自David的"The empty struct"一文，原文地址链接是http://dave.cheney.net/2014/03/25/the-empty-struct。
+
+Introduction
+
+这篇文章详细介绍了我最喜欢的Go数据类型，空结构体--struct{}。
+
+空结构体是没有位段的结构体，以下是空结构体的一些例子：
+
+type Q struct{}
+var q struct{}
+但是如果一个就结构体没有位段，不包含任何数据，那么他的用处是什么？我们能够利用空结构体完成什么任务？
+
+Width
+
+在深入研究空结构体之前，我想先简短的介绍一下关于结构体宽度的知识。
+
+术语宽度来自于gc编译器，但是他的词源可以追溯到几十年以前。
+
+宽度描述了存储一个数据类型实例需要占用的字节数，由于进程的内存空间是一维的，我更倾向于将宽度理解为Size（这个词实在不知道怎么翻译了，请谅解）。
+
+宽度是数据类型的一个属性。Go程序中所有的实例都是一种数据类型，一个实例的宽度是由他的数据类型决定的，通常是8bit的整数倍。
+
+我们可以通过unsafe.Sizeof()函数获取任何实例的宽度：
+
+var s string
+var c complex128
+fmt.Println(unsafe.Sizeof(s))    // prints 8
+fmt.Println(unsafe.Sizeof(c))    // prints 16
+http://play.golang.org/p/4mzdOKW6uQ
+
+数组的宽度是他元素宽度的整数倍。
+
+var a [3]uint32
+fmt.Println(unsafe.Sizeof(a)) // prints 12
+http://play.golang.org/p/YC97xsGG73
+
+结构体提供了定义组合类型的灵活方式，组合类型的宽度是字段宽度的和，然后再加上填充宽度。
+
+type S struct {
+        a uint16
+        b uint32
+}
+var s S
+fmt.Println(unsafe.Sizeof(s)) // prints 8, not 6
+An empty struct
+
+现在我们清楚的认识到空结构体的宽度是0，他占用了0字节的内存空间。
+
+var s struct{}
+fmt.Println(unsafe.Sizeof(s)) // prints 0
+由于空结构体占用0字节，那么空结构体也不需要填充字节。所以空结构体组成的组合数据类型也不会占用内存空间。
+
+type S struct {
+        A struct{}
+        B struct{}
+}
+var s S
+fmt.Println(unsafe.Sizeof(s)) // prints 0
+http://play.golang.org/p/PyGYFmPmMt
+
+What can you do with an empty struct
+
+由于Go的正交性，空结构体可以像其他结构体一样正常使用。正常结构体拥有的属性，空结构体一样具有。
+
+你可以定义一个空结构体组成的数组，当然这个切片不占用内存空间。
+
+var x [1000000000]struct{}
+fmt.Println(unsafe.Sizeof(x)) // prints 0
+http://play.golang.org/p/0lWjhSQmkc
+
+空结构体组成的切片的宽度只是他的头部数据的长度，就像上例展示的那样，切片元素不占用内存空间。
+
+var x = make([]struct{}, 1000000000)
+fmt.Println(unsafe.Sizeof(x)) // prints 12 in the playground
+http://play.golang.org/p/vBKP8VQpd8
+
+当然切片的内置子切片、长度和容量等属性依旧可以工作。
+
+var x = make([]struct{}, 100)
+var y = x[:50]
+fmt.Println(len(y), cap(y)) // prints 50 100
+http://play.golang.org/p/8cO4SbrWVP
+
+你甚至可以寻址一个空结构体，空结构体是可寻址的，就像其他类型的实例一样。
+
+var a struct{}
+var b = &a
+有意思的是两个空结构体的地址可以相等。
+
+var a, b struct{}
+fmt.Println(&a == &b) // true
+http://play.golang.org/p/uMjQpOOkX1
+
+空结构体的元素也具有一样的属性。
+
+a := make([]struct{}, 10)
+b := make([]struct{}, 20)
+fmt.Println(&a == &b)       // false, a and b are different slices
+fmt.Println(&a[0] == &b[0]) // true, their backing arrays are the same
+http://play.golang.org/p/oehdExdd96
+
+为什么会这样？因为空结构体不包含位段，所以不存储数据。如果空结构体不包含数据，那么就没有办法说两个空结构体的值不相等，所以空结构体的值就这样相等了。
+
+a := struct{}{} // not the zero value, a real new struct{} instance
+b := struct{}{}
+fmt.Println(a == b) // true
+http://play.golang.org/p/K9qjnPiwM8
+
+有兴趣可以参考这篇文章" Two distinct zero-size variables may have the same address in memory"。
+
+struct{} as a method receiver
+
+现在让我们展示一下空结构体如何像其他结构体工作，空结构体可以作为方法的接收者。
+
+type S struct{}
+
+func (s *S) addr() { fmt.Printf("%p\n", s) }
+
+func main() {
+        var a, b S
+        a.addr() // 0x1beeb0
+        b.addr() // 0x1beeb0
+}
+http://play.golang.org/p/YSQCczP-Pt
+
+在这篇文章中空结构体的地址是0x1beeb0，但是这个值可能随着Go版本的不同而发生变化。
+
+Wrapping up
+
+非常感谢您读完这篇冗长的文章，但是我还有一些其他的内容需要说明，请见随后更新。
+
+
+reference：http://www.jianshu.com/p/8e7e26a18f3c
