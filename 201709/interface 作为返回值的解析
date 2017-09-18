@@ -1,0 +1,55 @@
+package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+type Test struct {
+	Name string
+}
+
+func (i Test) String() string {
+	return fmt.Sprintf("item name: %v", i.Name)
+}
+
+type person struct {
+	Name string
+	Addr string
+}
+
+func (p person) String() string {
+	return fmt.Sprintf("person name: %v sex: %v", p.Name, p.Addr)
+}
+
+func Parse(i interface{}) interface{} {
+	switch i.(type) {
+	case string:
+		return &Test{
+			Name: i.(string),
+		}
+	case []string:
+		data := i.([]string)
+		length := len(data)
+		if length == 2 {
+			return &person{
+				Name: data[0],
+				Addr: data[1],
+			}
+		} else {
+			return nil
+		}
+	default:
+		panic(errors.New("type match miss"))
+	}
+	return nil
+}
+
+func main() {
+	p1 := Parse("t").(*Test)
+	fmt.Println(p1)
+	p2 := Parse([]string{"xiaoli", "bj"}).(*person)
+	fmt.Println(p2)
+}
+
+reference:http://blog.csdn.net/chdhust/article/details/51436882
