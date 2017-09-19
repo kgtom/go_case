@@ -1,0 +1,136 @@
+什么是wrk
+
+wrk是一个用来做HTTP benchmark测试的工具。可以产生显著的压力。不支持windows下使用。
+
+为什么是wrk
+相比于Apache ab功能更为强大，可以使用lua脚本来支持更为复杂的测试场景，例如PUT请求等。
+
+在对于Restful架构的API接口来说，测试起来更加便捷。
+
+获取和安装
+源码地址: https://github.com/wg/wrk
+1
+2
+3
+4
+5
+6
+$ git clone https://github.com/wg/wrk.git
+$ cd wrk
+$ make all
+$ cp wrk /usr/bin/wrk
+$ wrk -h
+使用方法
+ 
+简单的性能测试
+wrk -t12 -c100 -d30s http://192.168.31.107
+ 
+# 输出为
+12 threadsand 100 connections
+ThreadStats Avg Stdev Max +/- Stde
+Latency 538.64ms 368.66ms 1.99s 77.33
+Req/Sec 15.62 10.28 80.00 75.35
+5073 requestsin 30.09s, 75.28MB rea
+Socketerrors: connect 0, read 5, write 0,timeout 6
+Requests/sec: 168.5
+Transfer/sec: 2.50M
+-t12 为模拟12个用户线程 -c100模拟100个连接
+一般线程数不宜过多. 核数的2到4倍足够，wrk 不是使用每个连接一个线程的模型, 而是通过异步网络 io 提升并发量. 所以网络通信不会阻塞线程执行
+线程统计分析
+项目
+名称
+说明
+Avg
+平均值
+每次测试的平均值
+Stdev
+标准偏差
+结果的离散程度，越高说明越不稳定
+Max
+最大值
+最大的一次结果
++/- Stdev
+正负一个标准差占比
+结果的离散程度，越大越不稳定
+Latency: 可以理解为响应时间
+Req/Sec: 每个线程每秒钟的完成的请求数
+一般我们来说我们主要关注平均值和最大值.
+标准差如果太大说明样本本身离散程度比较高. 有可能系统性能波动很大
+读写分析
+总共完成请求数
+读取数据量
+错误统计
+5073 requestsin 30.09s, 75.28MB rea
+Socketerrors: connect 0, read 5, write 0, timeout 6
+Requests/sec: 168.5
+Transfer/sec: 2.50M
+
+
+。
+ 
+延迟请求使用方法
+1
+$ wrk -t 2 -c 50 -d 1 --latency http://xxxxx.com
+使用两个线程保持50个连接请求1秒钟，并打印延迟统计信息：
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+Running 1s test @ http://bj.58.com
+2 threads and 50 connections
+Thread Stats   Avg      Stdev     Max    +/- Stdev
+Latency   148.87ms  180.61ms 927.67ms   85.14%
+Req/Sec   192.47     99.38   400.00      63.16%
+Latency Distribution
+50%   65.21ms
+75%  204.23ms
+90%  355.24ms
+99%  835.83ms
+367 requests in 1.01s, 37.14MB read
+Requests/sec:    364.46
+Transfer/sec:     36.88MB
+主要关注的点有：
+
+§  Latency 请求处理时延，上面测试结果平均延时时间为148.87ms
+§  Requests/sec 每秒处理的请求数(QPS)
+上面的结果可以看到(Latency Distribution): 50%的请求延时在65.21ms
+
+当然，上面的请求时间只用了1s，理论上请求的时间越长得结果更加准确
+
+使用进阶
+模拟POST请求
+
+新建 post.lua
+1
+2
+3
+4
+wrk.method = "POST"
+wrk.body = "foo=bar&baz=qux"
+wrk.headers["Content-Type"] =  "application/x-www-form-urlencode"
+wrk.headers["User-Agent"] = "Mozilla/5.0 (Windows NT 6.1;  Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110  Safari/537.36"
+请求:
+
+1
+$ wrk -t 4 -c 100 -d 30s --timeout 10 --script=post.lua --latency  http://127.0.0.1/post.php
+通过在脚本中记录日志的方式可以看到$_POST数据和$_SERVER中的字段为lua脚本中设置的值.
+更为复杂的场景
+wrk提供了几个hook函数，可以用lua来编写一些更为复杂场景下的测试需求。
+
+ https://github.com/wg/wrk/blob/master/SCRIPTING
+ https://github.com/wg/wrk/tree/master/scripts
+reference：
+
+ https://github.com/wg/wrk
+ https://www.digitalocean.com/community/tutorials/how-to-benchmark-http-latency-with-wrk-on-ubuntu-14-04
+ http://www.jianshu.com/p/cf0853226dc6
