@@ -1,87 +1,150 @@
-// You can edit this code!
-// Click here and start typing.
+第一种： 按照batch分组且根据type分割成各自实体，然后返回
+
 package main
-
-import "fmt"
-
-type test struct {
-	Batch int
-	Type  int
-	Name  string
+ 
+import"fmt"
+ 
+typeteststruct {
+    Batchint
+    Type  int
+    Name  string
 }
-
-	// [
-	// 	{
-	// 	  "main": {
-	// 		"batch": 1,
-	// 		"type": 1,
-	// 		"name": "1.1"
-	// 	  },
-	// 	  "assist": {
-	// 		"batch": 1,
-	// 		"type": 2,
-	// 		"name": "1.2"
-	// 	  }
-	// 	},
-	// 	{
-	// 	  "main": {
-	// 		"batch": 2,
-	// 		"type": 1,
-	// 		"name": "1.1"
-	// 	  },
-	// 	  "assist": {
-	// 		"batch": 2,
-	// 		"type": 2,
-	// 		"name": "1.2"
-	// 	  }
-	// 	}
-	//   ]
-func main() {
-
-	d := []test{
-		{
-			Batch: 1,
-			Type:  1,
-			Name:  "1.1",
-		}, {
-			Batch: 1,
-			Type:  1,
-			Name:  "1.2",
-		}, {
-			Batch: 2,
-			Type:  2,
-			Name:  "2.1",
-		}, {
-			Batch: 2,
-			Type:  2,
-			Name:  "2.2",
-		},
-	}
-	//fmt.Println(d)
-
-	m := make([]map[string]interface{}, 2)
-	m1 := make(map[string]interface{}, 2)
-	m2 := make(map[string]interface{}, 2)
-	for _, item := range d {
-		if item.Batch == 1 {
-			if item.Type == 1 {
-				m1["main"] = item
-			} else {
-				m1["assist"] = item
-			}
-
-		}
-		if item.Batch == 2 {
-			if item.Type == 1 {
-				m2["main"] = item
-			} else {
-				m2["assist"] = item
-			}
-
-		}
-	}
-
-	m[0] = m1
-	m[1] = m2
-	fmt.Println(m)
+ 
+// [
+//  {
+//    "main": {
+//     "batch": 1,
+//     "type": 1,
+//     "name": "1.1"
+//    },
+//    "assist": {
+//     "batch": 1,
+//     "type": 2,
+//     "name": "1.2"
+//    }
+//  },
+//  {
+//    "main": {
+//     "batch": 2,
+//     "type": 1,
+//     "name": "1.1"
+//    },
+//    "assist": {
+//     "batch": 2,
+//     "type": 2,
+//     "name": "1.2"
+//    }
+//  }
+//   ]
+funcmain() {
+ 
+    d := []test{
+        {
+            Batch:1,
+            Type:  1,
+            Name:  "1.1",
+        },{
+            Batch:1,
+            Type:  1,
+            Name:  "1.2",
+        },{
+            Batch:2,
+            Type:  2,
+            Name:  "2.1",
+        },{
+            Batch:2,
+            Type:  2,
+            Name:  "2.2",
+        },
+    }
+ 
+    m := make([]map[string]interface{}, 3)
+    for_, item := range d {
+        if m[item.Batch-1] == nil {
+            m[item.Batch-1] = map[string]interface{}{}
+        }
+        if item.Type == 1 {
+ 
+            m[item.Batch-1]["main"] = map[string]interface{}{
+                "type": item.Type,
+                "name": item.Name,
+                "batch": item.Batch,
+            }
+        }else {
+            m[item.Batch-1]["assist"] = map[string]interface{}{
+                "type": item.Type,
+                "name": item.Name,
+                "batch": item.Batch,
+            }
+        }
+    }
+    fmt.Println(m)
+ 
 }
+ 
+ 
+
+第二种： 按照type 分组，然后返回
+package main
+ 
+import"fmt"
+ 
+typeteststruct {
+    Batchint
+    Type  int
+    Name  string
+}
+ 
+// {
+// "a": [
+//    {
+//     "batch": 1,
+//     "type": 1,
+//     "name": "1.1"
+//    },
+//    {
+//     "batch": 1,
+//     "type": 2,
+//     "name": "1.2"
+//    }
+//  ]
+//   }
+funcmain() {
+ 
+    d := []test{
+        {
+            Batch:1,
+            Type:  1,
+            Name:  "1.1",
+        },{
+            Batch:1,
+            Type:  1,
+            Name:  "1.2",
+        },{
+            Batch:2,
+            Type:  2,
+            Name:  "2.1",
+        },{
+            Batch:2,
+            Type:  2,
+            Name:  "2.2",
+        },
+    }
+ 
+    m := map[string][]interface{}{}
+    r1 := []interface{}{}
+    r2 := []interface{}{}
+    for_, item := range d {
+        if item.Type == 1 {
+            r1 = append(r1, item)
+        }
+        if item.Type == 2 {
+            r2 = append(r2, item)
+        }
+    }
+    m["a"] = r1
+    m["b"] = r2
+    fmt.Println(m)
+ 
+}
+ 
