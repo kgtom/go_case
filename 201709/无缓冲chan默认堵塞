@@ -1,0 +1,35 @@
+package main
+
+
+import (
+"fmt"
+
+)
+
+func f1(in chan int) {
+fmt.Println(<-in)
+}
+
+
+func main() {
+out := make(chan int)
+out <- 2
+go f1(out)
+
+}
+
+解析：默认无缓冲的channel是阻塞的，在
+out <- 2
+这一句会阻塞等待其它goroutine从out读取
+然而并没有其他goroutine。
+举例：打电话，你拨过去就等着人接，那边没人接你就一直等，所以阻塞了。
+所以改进方法就是，先开启一个goroutine去电话那头等着接电话，然后你再拨号，这样两边就通了，然后故事继续
+
+解决方法：
+out <- 2
+go f1(out)
+更换执行顺序。
+
+reference:
+https://segmentfault.com/q/1010000003023480
+
