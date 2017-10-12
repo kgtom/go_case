@@ -1,0 +1,17 @@
+临时的 struct 来封装数据，其它地方又不会被二次复用,可以使用匿名 struct 来实现。
+
+主要有两种方式,如下:
+第一种方式，通过 var 初始化
+
+var user struct{Name string;age int}
+user.Name = "tom"
+user.age = 18
+
+第二种方式，直接初始化
+user := struct {
+		Name string
+		age  int
+	}{
+		"tom",
+		18,
+	}
