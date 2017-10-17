@@ -1,0 +1,17 @@
+最近使用git,总是提示443ssl错误，经检查排除发现是因为设置代理的原因，代理最近不太稳定。
+
+
+设置代理：
+
+
+git config --global https.proxy http://127.0.0.1:1080
+
+git config --global https.proxy https://127.0.0.1:1080
+
+
+不设置代理：
+
+
+git config --global --unset http.proxy
+
+git config --global --unset https.proxy
