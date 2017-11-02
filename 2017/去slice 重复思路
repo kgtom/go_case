@@ -1,0 +1,20 @@
+package main
+
+import "log"
+
+func main() {
+	array := []int{1, 2, 2, 5, 2, 3, 1}
+
+	var ret []int
+	dic := make(map[int]bool)
+
+	for _, v := range array {
+		if !dic[v] {
+			dic[v] = true
+			ret = append(ret, v)
+		}
+	}
+
+	log.Print(ret)
+}
+
