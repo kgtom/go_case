@@ -1,0 +1,8 @@
+select date_part('day', '2015-01-15 17:05'::timestamp - '2013-01-14 16:05'::timestamp);//天数
+
+select ('2015-01-15 17:05'::timestamp)::date - ('2015-01-14 19:05'::timestamp)::date; //天数
+
+select extract(epoch FROM date('2012-09-03 00:00:00')); //转换成时间戳
+SELECT date(to_timestamp(1509699473))-date(to_timestamp(1509526672))//两个时间戳只差的天数
+	
+	
