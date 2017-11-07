@@ -1,0 +1,12 @@
+cd /opt/dev/src/demo  //进入当前项目
+export PATH=/opt/go/bin:$PATH
+export GOROOT=/opt/go
+export GOPATH=/opt/dev
+git pull
+go build -o /opt/dev/debug/demo //编译到新目录下，然后cp文件
+cp config.json /opt/dev/debug/demo/config.json
+cp -rf configs/ /opt/dev/debug/demo/
+cp -rf templates/ /opt/dev/debug/demo/
+cp -rf docs/ /opt/dev/debug/demo/
+pid=`ps aux | grep './demo' | grep -v "grep" | awk '{print $2}'` //找到旧的pid
+kill -usr2 $pid //kill 然后产生新的pid
