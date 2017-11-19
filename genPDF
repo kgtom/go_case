@@ -1,0 +1,20 @@
+package main
+
+import (
+	"fmt"
+
+	"github.com/jung-kurt/gofpdf"
+)
+
+func main() {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.AddPage()
+	pdf.SetFont("Arial", "B", 16)
+	pdf.Cell(40, 10, "Hello, world")
+	pdf.Image("C:\\test.png", 10, 6, 30, 0, false, "", 0, "")
+	err := pdf.OutputFileAndClose("hello.pdf")
+	if err != nil {
+		fmt.Println("err:", err)
+	}
+	fmt.Println("success")
+}
