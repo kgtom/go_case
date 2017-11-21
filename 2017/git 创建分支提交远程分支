@@ -1,0 +1,35 @@
+reference:https://my.oschina.net/u/219482/blog/285584
+
+1,从已有的分支创建新的分支(如从master分支),创建一个dev分支
+
+git checkout -b dev
+
+2,创建完可以查看一下,分支已经切换到dev
+
+git branch
+
+    * dev
+
+    master
+
+3,提交该分支到远程仓库
+
+git push origin dev
+
+4,测试从远程获取dev
+
+git pull origin dev
+
+或者：
+
+如果用命令行，运行 git fetch，可以将远程分支信息获取到本地，再运行 git checkout -b local-branchname origin/remote_branchname  就可以将远程分支映射到本地命名为local-branchname  的一分支
+
+5,我觉得现在重要的就是设置git push,pull默认的提交获取分支,这样就很方便的使用git push 提交信息或git pull获取信息
+
+git branch --set-upstream-to=origin/dev
+
+取消对master的跟踪
+
+git branch --unset-upstream master
+
+6,现在随便修改一下工程文件的内容,然后git commit ,git push,之后就可以直接提交到远程的dev分支中,而不会是master
