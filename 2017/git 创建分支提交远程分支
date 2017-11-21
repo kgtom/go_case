@@ -33,3 +33,11 @@ git branch --set-upstream-to=origin/dev
 git branch --unset-upstream master
 
 6,现在随便修改一下工程文件的内容,然后git commit ,git push,之后就可以直接提交到远程的dev分支中,而不会是master
+
+7.分支切换
+git checkout master 
+git checkout dev
+
+8.查看当前分支和所有分支
+git branch
+git branch -v 
