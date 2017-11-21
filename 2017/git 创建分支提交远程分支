@@ -41,3 +41,7 @@ git checkout dev
 8.查看当前分支和所有分支
 git branch
 git branch -v 
+
+9.删除分支
+git branch -d dev 删除分支dev,注意不要在dev 分支执行命令。
+git push origin :dev 删除远程dev 分支
