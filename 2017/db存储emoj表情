@@ -1,0 +1,40 @@
+(1)：修改mysql数据库的编码为uft8mb4
+
+修改mysql配置文件my.cnf（windows为my.ini） 
+my.cnf一般在etc/mysql/my.cnf位置。找到后请在以下三部分里添加如下内容： 
+[client] 
+default-character-set = utf8mb4 
+[mysql] 
+default-character-set = utf8mb4 
+[mysqld] 
+character-set-client-handshake = FALSE 
+character-set-server = utf8mb4 
+collation-server = utf8mb4_unicode_ci 
+init_connect='SET NAMES utf8mb4'
+
+SHOW VARIABLES WHERE Variable_name LIKE 'character_set_%' OR Variable_name LIKE 'collation%';
+Variable_name	Value
+character_set_client	utf8mb4
+character_set_connection	utf8mb4
+character_set_database	utf8mb4
+character_set_filesystem	binary
+character_set_results	utf8mb4
+character_set_server	utf8mb4
+character_set_system	utf8
+collation_connection	utf8mb4_unicode_ci
+collation_database	utf8mb4_unicode_ci
+collation_server	utf8mb4_unicode_ci
+collation_connection 、collation_database 、collation_server是什么没关系。
+但必须保证
+系统变量	描述
+character_set_client	(客户端来源数据使用的字符集)
+character_set_connection	(连接层字符集)
+character_set_database	(当前选中数据库的默认字符集)
+character_set_results	(查询结果字符集)
+character_set_server	(默认的内部操作字符集)
+
+(2)：修改数据表的编码为utf8mb4
+ 执行命令：ALTER TABLE TABLE_NAME CONVERT TO CHARACTER SET utf8mb4;
+ 
+(3)：修改连接数据库的连接代码
+db, err = xorm.NewEngine("mysql", "testuser:123456@tcp(192.168.0.10:3306)/testdb?charset=utf8mb4")
