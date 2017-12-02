@@ -37,7 +37,11 @@ Golang 部署：
  1.windows下，建立window服务，即 windows Service,然后启动windows下编译生成的exe可执行文件，开机自启动。
  2.linux下，使用 supervisord 帮你把linux环境编译的二进制文件转成 daemon 程序。参数具体如下：
 
-ps:  supervisord 的配置文件放在 /etc/supervisord.d文件夹内
+ps:  supervisord 的配置文件放在 /etc/supervisord.d文件夹内,
+ 然后在supervisord.conf 中include 这个文件夹中的各个应用的配置文件，如下：
+[include]
+files = supervisord.d/app1.ini supervisord.d/test.ini
+
 ps： 上传的go 二进制文件，必须有可执行权限 
 查看权限：ls -l test
 增加可执行权限：chmod a+x test
@@ -52,8 +56,15 @@ startretries=10
 stderr_logfile=/var/log/supervisor/test.stderr.log
 stdout_logfile=/var/log/supervisor/test.stdout.log
 
-ps:ngnix 配置文件放在 /etc/nginx文件夹内的 nginx.conf,在nginx文件夹内建立conf.d，放各个app配置文件，然后include在nginx.conf中.
- 重启 ngnix: /usr/sbin/nginx -s reload
+ps:ngnix 配置文件放在 /etc/nginx文件夹内的 nginx.conf,在nginx文件夹内建立conf.d，放各个app配置文件，如下：
+[root@pc nginx]# cd conf.d
+[root@pc conf.d]# ls
+app1.conf  test.conf  default.conf
+然后include在nginx.conf中,如下：
+
+include /etc/nginx/conf.d/*.conf;
+
+重启 ngnix: /usr/sbin/nginx -s reload
 
 举个例子：
 # supervisorctl  stop test
