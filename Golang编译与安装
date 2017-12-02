@@ -60,6 +60,26 @@ ps:ngnix 配置文件放在 /etc/nginx文件夹内的 nginx.conf,在nginx文件�
 [root@pc nginx]# cd conf.d
 [root@pc conf.d]# ls
 app1.conf  test.conf  default.conf
+例如：app1.conf 内容：
+server {
+    listen 8080;
+    server_name www.app1.com ;
+
+    access_log /var/log/nginx/app1-access.log main;
+    error_log /var/log/nginx/app1-error.log;
+
+    location / {
+        proxy_pass http://127.0.0.1:8081;
+    }
+
+    location /static/ {
+        alias /var/www/app1/static/;
+        expires 1d;
+    }
+}
+~                                                                                              
+~                                                                                              
+~                 
 然后include在nginx.conf中,如下：
 
 include /etc/nginx/conf.d/*.conf;
