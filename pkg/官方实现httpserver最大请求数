@@ -1,0 +1,58 @@
+reference:
+https://github.com/golang/net/blob/master/netutil/listen.go
+
+问题：处理大数据的服务，会对服务做个最大连接数限制，超过该限制之后，拒绝服务，避免发生雪崩。
+
+基本思路：基本思路就是为连接数计数，建立一个最大连接数的channel, 每次accept就+1，close时候就-1.
+         当到达最大连接数时，就等待空闲连接出来之后再accept。
+         
+   调用 LimitListener("",maxConn)  将最大连接数传入    
+
+/ Copyright 2013 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+// Package netutil provides network utility functions, complementing the more
+// common ones in the net package.
+package netutil // import "golang.org/x/net/netutil"
+
+import (
+	"net"
+	"sync"
+)
+
+// LimitListener returns a Listener that accepts at most n simultaneous
+// connections from the provided Listener.
+func LimitListener(l net.Listener, n int) net.Listener {
+	return &limitListener{l, make(chan struct{}, n)}
+}
+
+type limitListener struct {
+	net.Listener
+	sem chan struct{}
+}
+
+func (l *limitListener) acquire() { l.sem <- struct{}{} }
+func (l *limitListener) release() { <-l.sem }
+
+func (l *limitListener) Accept() (net.Conn, error) {
+	l.acquire()
+	c, err := l.Listener.Accept()
+	if err != nil {
+		l.release()
+		return nil, err
+	}
+	return &limitListenerConn{Conn: c, release: l.release}, nil
+}
+
+type limitListenerConn struct {
+	net.Conn
+	releaseOnce sync.Once
+	release     func()
+}
+
+func (l *limitListenerConn) Close() error {
+	err := l.Conn.Close()
+	l.releaseOnce.Do(l.release)
+	return err
+}
