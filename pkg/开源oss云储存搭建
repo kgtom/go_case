@@ -1,0 +1,8 @@
+reference:https://github.com/minio/minio
+
+Binary Download
+
+Platform	Architecture	URL
+GNU/Linux	64-bit Intel	https://dl.minio.io/server/minio/release/linux-amd64/minio
+chmod +x minio
+./minio server /data
