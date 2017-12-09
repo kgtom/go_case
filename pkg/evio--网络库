@@ -1,0 +1,26 @@
+reference:
+https://github.com/tidwall/evio
+
+evio是一个性能很高的event-loop网络库，代码简单，功能强大。它直接使用 epoll和kqueue系统调用，除了Go标准net库提供了另外一种思路， 类似libuv和libevent。
+
+这个库实现redis和haproxy等同的包处理机制，但并不想完全替代标准的net包。对于一个需要长时间运行的请求(大于1毫秒)， 比如数据库访问、身份验证等，建议还是使用Go net/http库。
+
+你可能知道， 由很多基于event-loop的程序， 比如Nginx、Haproxy、redis、memcached等，性能都非常不错，而且它们都是单线程运行的，非常快。
+
+这个库还有一个好处， 你可以在一个event-loop中处理多个network binding。
+
+一个简单的例子：
+
+
+package main
+import "github.com/tidwall/evio"
+func main() {
+	var events evio.Events
+	events.Data = func(id int, in []byte) (out []byte, action evio.Action) {
+		out = in
+		return
+	}
+	if err := evio.Serve(events, "tcp://localhost:5000", "tcp://192.168.0.10:5001", "tcp://192.168.0.10:5002","unix://socket"); err != nil {
+		panic(err.Error())
+	}
+}
