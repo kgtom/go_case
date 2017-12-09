@@ -25,3 +25,7 @@ if err != nil {
 }
 
 ps：CaptureErrorAndWait 还有其他方法，推荐使用：raven.Capture(packet, nil)
+
+业务使用流程：
+系统错误(应用程序错误）例如 数据库链接错误，使用sentry中Reven
+业务错误：所有发送和请求都使用Logrus,存入 elasticSearch,使用Kibana进行检索信息
