@@ -1,0 +1,27 @@
+reference:https://github.com/getsentry/sentry
+https://blog.windrunner.me/tool/sentry.html
+https://docs.sentry.io/clients/go/
+
+支持主流语言的api。Go语言版本如下：
+https://github.com/getsentry/raven-go
+
+1.安装：
+
+$ go get github.com/getsentry/raven-go
+
+2.初始化
+package main
+
+import "github.com/getsentry/raven-go"
+
+func init() {
+    raven.SetDSN("https://<key>:<secret>@sentry.io/<project>")
+}
+3.使用demo:
+f, err := os.Open("filename.ext")
+if err != nil {
+    raven.CaptureErrorAndWait(err, nil)
+    log.Panic(err)
+}
+
+ps：CaptureErrorAndWait 还有其他方法，推荐使用：raven.Capture(packet, nil)
