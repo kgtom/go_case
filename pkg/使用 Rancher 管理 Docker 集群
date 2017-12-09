@@ -1,0 +1,11 @@
+reference:https://github.com/rancher/rancher
+http://www.10tiao.com/html/357/201703/2247484935/1.html
+
+使用背景：在dev 环境使用k8s 面临无形的"qiang"的问题，即使用上proxy，用起来不顺畅，于是决定使用rancher 管理docker,prod环境直接使用aliyun k8s一键部署。
+
+
+业务使用流程：
+
+
+ vscode--->github--->(hook)--->jenkins--->(shell)--->私有镜像仓库--->rancher update
+
