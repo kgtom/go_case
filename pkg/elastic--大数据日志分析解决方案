@@ -8,14 +8,15 @@ Loggrus：收集结构化日志信息
 Elogrus：Logrus Hook for ElasticSearch，将日志信息，发送到elastic
 Elastic：Package elastic provides an interface to the Elasticsearch server，将信息发送到Elasticsearch
 
+ps：Logrus同时也支持Sentry。Sentry Hook for Logrus：https://github.com/evalphobia/logrus_sentry
 
-使用流程：
+使用：
 
-Kibana 让您能够可视化 Elasticsearch 中的数据
-
-Usage
-
+安装：
 go get gopkg.in/sohlich/elogrus.v2
+
+用例：
+
 package main
 
 import (
@@ -42,3 +43,8 @@ func main() {
 		"age":  42,
 	}).Error("Hello world!")
 }
+
+业务使用流程：
+系统错误(应用程序错误）例如 数据库链接错误，使用sentry中Reven
+业务错误：所有发送和请求都使用Logrus,存入 elasticSearch,使用Kibana进行检索信息
+
