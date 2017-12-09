@@ -1,0 +1,27 @@
+reference:
+https://github.com/jenkinsci/jenkins
+http://www.jianshu.com/p/b524b151d35f
+https://jimmysong.io/kubernetes-handbook/practice/jenkins-ci-cd.html
+
+
+为什么使用：免费，资料多；自动化编译、打包、部署，可以定时及hook进行其他业务处理。
+使用流程：
+1.开发
+2.提交
+3.编译
+4.测试
+5.发布
+有了Jenkins的帮助，在这5步中，除了第1步，后续的4步都是自动化完成的，具体的，当你完成了提交，Jenkins会自动运行你的编译脚本，编译成功后，
+再运行你的测试脚本，这一步成功后，接着它会帮你把新程序发布出去，特别的，在最后一步，你可以选择手动发布，或自动发布，毕竟发布这件事情，
+还是需要人为的确认一下比较好。简而言之：
+Jenkins可以帮你在写完代码后，一键完成开发过程中的一系列工作.
+
+应用构建和发布流程说明:
+
+用户向Github 提交代码，代码中必须包含Dockerfile
+将代码提交到远程仓库
+用户在发布应用时需要填写git仓库地址和分支、服务类型、服务名称、资源数量、实例个数，确定后触发Jenkins自动构建
+Jenkins的CI流水线自动编译代码并打包成docker镜像推送到 私有镜像仓库
+Rancher(hook)获取到最新的docker镜像，部署应用
+
+
