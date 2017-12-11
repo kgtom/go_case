@@ -1,1 +1,7 @@
-reference:https://github.com/polaris1119/The-Golang-Standard-Library-by-Example/blob/master/chapter01/01.1.md
+reference:
+https://github.com/polaris1119/The-Golang-Standard-Library-by-Example/blob/master/chapter01/01.1.md
+http://golang.baboq.com/
+
+Go语言的标准库（通常被称为语言自带的电池），
+提供了清晰的构建模块和公共接口，包含I/O操作、文本处理、图像、密码学、网络和分布式应用程序等，
+并支持许多标准化的文件格式和编解码协议。
