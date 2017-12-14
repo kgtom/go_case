@@ -1,0 +1,56 @@
+package main
+
+import (
+	"fmt"
+	"log"
+	"os"
+	"time"
+
+	"github.com/image-sign/src/signer"
+	"github.com/image-sign/src/utility/process"
+)
+
+var (
+	dataPath string = ""
+)
+
+func init() {
+	rootPath, err := process.RootPath()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	dataPath = rootPath + "/dat/"
+}
+func main() {
+
+	now := time.Now()
+	dd, _ := time.ParseDuration("2160h")
+	dd1 := now.Add(dd)
+	fmt.Println(dd1)
+
+	src, err := os.Open(dataPath + "src.png")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer src.Close()
+
+	dst, err := os.OpenFile(dataPath+"out.png", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer dst.Close()
+
+	signWriter := signer.NewSigner(dataPath + "luximr.ttf")
+	signWriter.SetStartPoint(5, 10)
+	signWriter.SetSignPoint(100, 100)
+	err = signWriter.Sign(src, dst, "tom", 0)
+	if err != nil {
+		log.Println(err)
+
+	}
+	fmt.Println("success")
+}
+
+
+main.go
+dat:luximr.ttf src.png out.png
