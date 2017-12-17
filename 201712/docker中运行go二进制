@@ -50,6 +50,15 @@ docker rmi  -f e06076a14133
  
 [root@app]# docker ps
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS                    NAMES
-af1f4f58c163        opms                "./testopms"        6 seconds ago       Up 5 seconds        0.0.0.0:8080->8080/tcp   adoring_shirley
+af1f4f58c163        testapp                "./testapp"        6 seconds ago       Up 5 seconds        0.0.0.0:8080->8080/tcp   adoring_shirley
 
 $  docker exec -it af1f4f58c163 /bin/bash  
+可以查看  拷贝过去的文件是否正确
+
+10.推送到docker hub 上去。
+ 先登录 docker login  
+ 然后 修改不规范的命名：（规范：docker push 注册用户名/镜像名  ）
+ 修改：docker tag testapp  注册用户名/testapp
+ 推送： docker push 注册用户名/testapp:latest  
+ 
+ 注意：推送Docker Hub速度很慢，耐心等待，很有可能失败，失败会尝试多次重传，上传成功后，登录 https://hub.docker.com/ 查看即可
