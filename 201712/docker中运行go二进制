@@ -40,5 +40,5 @@ docker stop e06076a14133
 或
 docker kill e06076a14133
 
-8. 删除镜像（-i:强制删除）
-docker rmi  -i e06076a14133
+8. 删除镜像（-f:强制删除）
+docker rmi  -f e06076a14133
