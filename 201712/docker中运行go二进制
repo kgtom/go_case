@@ -1,0 +1,44 @@
+
+本文在app目录下，有个testApp 二进制文件 为例。
+1.在app 目录下，编写Dockerfile 文件
+
+FROM golang:latest
+MAINTAINER Razil "tom@gmail.com"
+
+WORKDIR $GOPATH/src/
+ADD testApp  $GOPATH/src/
+
+
+EXPOSE 8001
+
+ENTRYPOINT ["./testApp"]
+
+ps:注意 add 的使用，路径容易写错。
+
+2.构建镜像 名称：test_app_test
+docker build -t test_app_test .
+
+3.查看镜像
+docker images
+
+4.开启docker
+docker run -p 8080:8001 test_app_test
+
+5.开启docker 后台运行
+
+docker run -p 8080:8001 -d test_app_test
+
+6.查看正在运行的 容器
+docker ps
+[root@app]# docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS                    NAMES
+e06076a14133        testapp             "./testApp"         2 hours ago         Up 2 hours          0.0.0.0:8080->8001/tcp   elastic_gates
+
+
+7.停止 容器 id
+docker stop e06076a14133
+或
+docker kill e06076a14133
+
+8. 删除镜像（-i:强制删除）
+docker rmi  -i e06076a14133
