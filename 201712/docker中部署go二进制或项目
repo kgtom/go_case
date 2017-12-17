@@ -50,9 +50,9 @@ docker rmi  -f e06076a14133
  
 [root@app]# docker ps
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS                    NAMES
-af1f4f58c163        testapp                "./testapp"        6 seconds ago       Up 5 seconds        0.0.0.0:8080->8080/tcp   adoring_shirley
+e06076a14133        testapp             "./testApp"         2 hours ago         Up 2 hours          0.0.0.0:8080->8001/tcp   elastic_gates
 
-$  docker exec -it af1f4f58c163 /bin/bash  
+$  docker exec -it e06076a14133 /bin/bash  
 可以查看  拷贝过去的文件是否正确
 
 10.推送到docker hub 上去。
@@ -61,4 +61,6 @@ $  docker exec -it af1f4f58c163 /bin/bash
  修改：docker tag testapp  注册用户名/testapp
  推送： docker push 注册用户名/testapp:latest  
  
- 注意：推送Docker Hub速度很慢，耐心等待，很有可能失败，失败会尝试多次重传，上传成功后，登录 https://hub.docker.com/ 查看即可
+ 注意：推送Docker Hub速度很慢，耐心等待，很有可能失败，失败会尝试多次重传，上传成功后，登录 https://hub.docker.com/ 查看即可。
+ 
+ 本实例 部署go二进制演示，部署的项目的话，需要 Dockerfile 文件中，将项目目录下的文件拷贝到镜像中，其它docker的使用相同。
