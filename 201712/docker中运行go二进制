@@ -14,6 +14,9 @@ EXPOSE 8001
 ENTRYPOINT ["./testApp"]
 
 ps:注意 add 的使用，路径容易写错。
+两种情况：  a. conf 是文件夹目录  add conf $GOPATH/src/conf/  此情况将conf目录下文件拷贝到 (docker镜像)目标conf目录下
+           b. conf 时文件  add conf $GOPATH/src/  此情况conf文件拷贝到 (docker镜像)目标src目录下
+
 
 2.构建镜像 名称：test_app_test
 docker build -t test_app_test .
