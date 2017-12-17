@@ -42,3 +42,11 @@ docker kill e06076a14133
 
 8. 删除镜像（-f:强制删除）
 docker rmi  -f e06076a14133
+
+9.进入容器
+ 
+[root@app]# docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS                    NAMES
+af1f4f58c163        opms                "./testopms"        6 seconds ago       Up 5 seconds        0.0.0.0:8080->8080/tcp   adoring_shirley
+
+$  docker exec -it af1f4f58c163 /bin/bash  
