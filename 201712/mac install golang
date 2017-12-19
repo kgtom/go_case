@@ -1,0 +1,12 @@
+1.brew install go
+2.vim .bash_profile
+
+export GOPATH=/Users/tom/goprojects
+export GOBIN=$GOPATH/bin
+export PATH=$PATH:$GOBIN
+
+3. 生效
+source .bash_profile
+
+4. go env 查看是否设置正确
+
