@@ -1,6 +1,6 @@
 reference:https://my.oschina.net/u/219482/blog/285584
 
-1,从已有的分支创建新的分支(如从master分支),创建一个dev分支
+1,从已有的分支创建新的本地分支(如从master分支),创建一个dev分支
 
 git checkout -b dev
 
@@ -44,7 +44,10 @@ git branch -v
 
 9.删除分支
 git branch -d dev 删除分支dev,注意不要在dev 分支执行命令。
-git push origin :dev 删除远程dev 分支
+git push origin :dev 删除远程dev 分支，注意 origin 后面的空格
+
+10.获取远程的分支
+git checkout -b 本地分支名 origin/远程分支名
 
 
 ps:
