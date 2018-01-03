@@ -64,3 +64,8 @@ $  docker exec -it e06076a14133 /bin/bash
  注意：推送Docker Hub速度很慢，耐心等待，很有可能失败，失败会尝试多次重传，上传成功后，登录 https://hub.docker.com/ 查看即可。
  
  本实例 部署go二进制演示，部署的项目的话，需要 Dockerfile 文件中，将项目目录下的文件拷贝到镜像中，其它docker的使用相同。
+ 
+ 11.获取 docker hub 中镜像
+ docker pull kgtom/ubuntu-nginx:v1 
+ ps：v1 版本号
+ 
