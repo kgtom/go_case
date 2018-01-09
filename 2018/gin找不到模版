@@ -1,0 +1,5 @@
+r.LoadHTMLGlob(filepath.Join(os.Getenv("GOPATH"), "src/deom/templates/*"))
+原因：由于采用了相对路径，
+解决方案：采用绝对路径即可解决问题。
+
+ 
