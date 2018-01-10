@@ -1,0 +1,4 @@
+
+强调一点：获取session 使用：
+ctx.Input.CruSession.Get("userLogin") //在过滤器获取Session 
+this.SetSession("tom", 1) //在controller设置
