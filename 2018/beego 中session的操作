@@ -1,0 +1,6 @@
+reference：http://blog.csdn.net/defonds/article/details/50538077
+Windows：
+1.安装包 一路next 安装
+2.配置环境变量：GOROOT（默认安装目录，一般 c/Go） 和 GOPATH(自己存放go代码的工作目录)
+3. 测试是否安装成功 
+  go 
