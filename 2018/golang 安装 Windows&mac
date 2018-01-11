@@ -27,3 +27,6 @@ source .bash_profile
 
 4. go env 查看是否设置正确
 5.hello world 测试，同Windows
+
+
+golang各个版本：https://golang.org/dl/
