@@ -1,0 +1,15 @@
+
+type UserAmountModel struct {
+	Name   string  `json:"name" binding:"required" valid:"stringlength(1|2)"`
+	Amount float64 `json:"amount" binding:"required" valid:"-"`
+	Email  string  `json:"email" binding:"required" valid:"email"`
+	Ip     string  `json:"ip" binding:"required" valid:"ipv4"`
+}
+
+float64可以使用方法进行校验：
+ok := govalidator.IsNonNegative(ua.Amount)
+			if !ok {
+				return msgerror.New("float64 error")
+			}
+
+reference：https://github.com/asaskevich/govalidator
