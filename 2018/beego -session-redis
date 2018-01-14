@@ -1,0 +1,5 @@
+session 中使用redis 做为存储引擎，
+配置如下：
+  beego.BConfig.WebConfig.Session.SessionProvider = "redis"
+	beego.BConfig.WebConfig.Session.SessionProviderConfig = "127.0.0.1:6379,100,pwd,dbNum"//100:redis max pool size
+	beego.BConfig.WebConfig.Session.SessionOn = true
