@@ -56,3 +56,31 @@ func GetUrl(url string) []byte {
 	data, _ := ioutil.ReadAll(body)
 	return data
 }
+
+//Linux下注意权限问题，eg:
+package main
+
+import (
+	"encoding/json"
+	"log"
+	"os"
+	"time"
+)
+
+func main() {
+	file, err := os.OpenFile("./test.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalln("failed to open test file:", err)
+	}
+	defer file.Close()
+
+	logger := log.New(file,
+		"LOG_PREFIX: ",
+		log.Ldate|log.Ltime|log.Lshortfile)
+
+	for {
+		logger.Println("test log")
+		time.Sleep(time.Second * 5)
+	}
+}
+
