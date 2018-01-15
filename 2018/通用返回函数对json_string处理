@@ -1,0 +1,40 @@
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+)
+
+func main() {
+	s, err := marshalRes(0, "success", `{"a":"12","b":"23"}`)
+	if err != nil {
+		fmt.Println("marsha res err:", err)
+		return
+	}
+	fmt.Println(s)
+
+}
+func marshalRes(code int, msg string, ret interface{}) (string, error) {
+	m := map[string]interface{}{
+		"code": 0,
+		"msg":  msg,
+		//"result": ret,
+	}
+	//当 ret 的值类型为json string时，有转义反斜线
+	//{"code":0,"msg":"ok","result":"{\"a\":\"12\",\"b\":\"23\"}"}
+	s, ok := ret.(string)
+	if ok {
+		m["result"] = json.RawMessage(s)
+		//{"code":0,"msg":"success","result":{"a":"12","b":"23"}}
+	} else {
+		m["result"] = ret
+	}
+	b, err := json.Marshal(&m)
+	if err != nil {
+		return "", err
+	}
+
+	return string(b), nil
+}
+
+//tks:http://tonybai.com/2018/01/13/the-problems-i-encountered-when-writing-go-code-issue-1st/
