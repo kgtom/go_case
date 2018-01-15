@@ -1,0 +1,58 @@
+package main
+
+import (
+	"encoding/base64"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"os"
+)
+
+func main() {
+	//读原图片
+	f, err := os.Open("a.png")
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer f.Close()
+	sbuf := make([]byte, 500000)
+	n, err := f.Read(sbuf)
+	if err != nil {
+		fmt.Println(err)
+	}
+	//base64压缩
+	str := base64.StdEncoding.EncodeToString(sbuf[:n])
+	fmt.Println("输出", str)
+	//写入临时文件
+	ioutil.WriteFile("a.png.txt", []byte(str), 0667)
+	//读取临时文件
+	c, err := ioutil.ReadFile("a.png.txt")
+	if err != nil {
+		fmt.Println(err)
+	}
+	//解压
+	dist, err := base64.StdEncoding.DecodeString(string(c))
+	if err != nil {
+		fmt.Println(err)
+	}
+	//写入新文件
+	f2, err := os.OpenFile("b.png", os.O_RDWR|os.O_CREATE, os.ModePerm)
+	defer f2.Close()
+	f2.Write(dist)
+
+	//获取网络图片，返回base64
+	a := GetUrl("https://www.baidu.com/img/baidu_jgylogo3.gif")
+	str2 := base64.StdEncoding.EncodeToString(a)
+	fmt.Println("输出", str2)
+}
+
+func GetUrl(url string) []byte {
+	ret, err := http.Get(url)
+	if err != nil {
+		fmt.Println(err)
+
+	}
+	body := ret.Body
+	data, _ := ioutil.ReadAll(body)
+	return data
+}
