@@ -1,0 +1,13 @@
+一个公司用户，另一个是自己GitHub上用户，我将自己的账号配置全局的，公司的账号配置到当前repository局部配置。如下：
+
+# 配置git账户
+git config --list #查看当前配置
+git config --list --local #查看当前仓库配置
+git config --list --global #查看全局配置
+# 配置全局账户（
+git config --global user.name "your_github_name" 
+git config --global user.email "your_github_email" 
+# 配置本地仓库账户 
+cd 当前repository下里面：
+git config --local user.name "your_company_name"  
+git config --local user.email "your_company_email"  
