@@ -1,0 +1,40 @@
+/*
+使用interface{} 实现泛型操作：funcInt\funcString使用类型断言,funcC更优雅的方式实现泛型。
+
+*/
+
+package main
+
+import "fmt"
+
+func funcInt(i interface{}) {
+	val := i.(int)
+	fmt.Println("int is: ", val)
+}
+
+func funcString(i interface{}) {
+	val := i.(string)
+	fmt.Println("str is:", val)
+}
+
+func funcC(i interface{}) {
+	switch v := i.(type) {
+	case int:
+		fmt.Println("c int:", v)
+	case string:
+		fmt.Println("c string:", v)
+
+	}
+}
+
+func main() {
+
+	i := 10
+	funcInt(i)
+
+	s := "golang"
+	funcString(s)
+
+	funcC(i)
+	funcC(s)
+}
