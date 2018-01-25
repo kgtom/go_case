@@ -11,3 +11,8 @@ git config --global user.email "your_github_email"
 cd 当前repository下里面：
 git config --local user.name "your_company_name"  
 git config --local user.email "your_company_email"  
+
+#获取：
+ git config --get user.name
+#删除：
+ git config --local --unset user.name
