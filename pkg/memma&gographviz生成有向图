@@ -1,0 +1,90 @@
+
+Graphviz 的是AT&T Labs Research开发的图形绘制工具软件,用于绘制DOT语言脚本描述的图形。
+作为后端研发人员主要生成有向图，查看数据结构逻辑关系。除有向图外，还有无向图、圆环图等。
+
+1.安装
+http://www.graphviz.org/download/
+如果是mac的话，直接使用 brew install Graphviz
+安装完成后，使用 dot -V 如果显示版本号，说明安装成功。
+
+2.使用：
+go get github.com/awalterschulze/gographviz
+go get github.com/bradleyjkemp/memma
+
+代码：
+package main
+
+import (
+	"bytes"
+	"fmt"
+	"io/ioutil"
+	"os/exec"
+
+	"github.com/awalterschulze/gographviz"
+	"github.com/bradleyjkemp/memmap"
+)
+
+type tree struct {
+	id    int
+	left  *tree
+	right *tree
+}
+
+func main() {
+
+	imgbys := Test()
+	graphAst, _ := gographviz.Parse(imgbys.Bytes()) //gographviz.Parse([]byte
+	graph := gographviz.NewGraph()
+	gographviz.Analyse(graphAst, graph)
+	graph.AddNode("G", "a", nil)
+	graph.AddNode("G", "b", nil)
+	graph.AddEdge("a", "b", true, nil)
+	fmt.Println(graph.String())
+
+	// 生成文件
+	ioutil.WriteFile("1.gv", []byte(graph.String()), 0666)
+
+	// 生成图片
+	execCmd("dot 1.gv -T png -o 1.png")
+}
+
+//调用命令
+func execCmd(s string) {
+	cmd := exec.Command(`/bin/sh`, `-c`, s)
+	var outBuf bytes.Buffer
+	cmd.Stdout = &outBuf //标准输出buf
+	err := cmd.Run()
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Printf("%s", outBuf.String()) //输出执行结果
+}
+
+func Test() *bytes.Buffer {
+
+	root := &tree{
+		id: 0,
+		left: &tree{
+			id: 1,
+		},
+		right: &tree{
+			id: 2,
+		},
+	}
+	leaf := &tree{
+		id: 3,
+	}
+
+	root.left.right = leaf
+	root.right.left = leaf
+
+	b := &bytes.Buffer{}
+	memmap.Map(b, root)
+	return b
+}
+
+
+reference：
+https://github.com/bradleyjkemp/memmap
+https://github.com/awalterschulze/gographviz
+
