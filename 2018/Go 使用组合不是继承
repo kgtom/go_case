@@ -1,0 +1,25 @@
+Java、C#继承中多态性是通过多个子类继承父类来实现，
+Go语言提倡使用组合代替继承，上代码：
+
+package main
+
+import (
+	"log"
+)
+
+type B interface {
+	foo()
+}
+
+type A struct {
+	B//组合方式
+}
+
+func (a *A) foo() {
+	log.Printf("A foo......")
+}
+
+func main() {
+	var a A
+	a.foo()
+}
