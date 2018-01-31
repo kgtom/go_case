@@ -1,0 +1,25 @@
+在Go语言中，一个interface{}类型的变量，在底层包含了2个指针，一个指针指向值的类型，另外一个指针指向实际的值。
+底层数据结构是(type, data)
+var val interface{} = int64(10)
+	fmt.Println(reflect.TypeOf(val))  //int64
+	fmt.Println(reflect.ValueOf(val)) //10
+	fmt.Println(val == nil)
+
+	//只有 type 和data 都为nil ，则为true
+	var i interface{} = nil
+	fmt.Println(reflect.TypeOf(i))  //nil
+	fmt.Println(reflect.ValueOf(i)) // 无效的地址 即：nil
+	if i == nil {
+		fmt.Println("i is nil")
+	} else {
+		fmt.Println("i is not nil")
+	}
+
+	var j interface{} = (*interface{})(nil)
+	fmt.Println(reflect.TypeOf(j))  //*interface {} 是空接口类型指针 不是nil 类型，
+	fmt.Println(reflect.ValueOf(j)) // nil空指针
+	if j == nil {
+		fmt.Println("j is nil")
+	} else {
+		fmt.Println("j is not nil")
+	}
