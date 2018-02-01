@@ -1,4 +1,36 @@
-//总结:
+-----------------------edit:重点说一下 并发情况下，不在使用传统的加锁机制了。-------------------
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+const N = 3
+
+func main() {
+
+	//m := &map[int]int{}
+	m := &sync.Map{}
+	wg := &sync.WaitGroup{}
+	//mu := &sync.Mutex{}
+	wg.Add(N)
+	for i := 0; i < N; i++ {
+		go func(i int) {
+			//mu.Lock()
+			//(*m)[i] = i
+			m.Store(i, i)
+			//mu.Unlock()
+			wg.Done()
+		}(i)
+	}
+	wg.Wait()
+	fmt.Println(m)
+
+}
+
+----------------------------end-----------------------------
+
 package main
 
 import (
