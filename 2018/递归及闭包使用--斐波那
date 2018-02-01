@@ -12,7 +12,7 @@ func fi2(x int) int {
 
 	return aa
 }
-//闭包
+//闭包：把函数作为参数传递，闭包读取局部变量的值，保证变量的安全。
 func fi() func() int {
 	x, y := 0, 1
 	return func() int {
