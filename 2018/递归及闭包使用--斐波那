@@ -1,0 +1,30 @@
+package main
+
+import "fmt"
+
+//递归
+func fi2(x int) int {
+	if x <= 2 {
+
+		return 1
+	}
+	aa := fi2(x-1) + fi2(x-2)
+
+	return aa
+}
+//闭包
+func fi() func() int {
+	x, y := 0, 1
+	return func() int {
+		x, y = y, x+y
+		return x
+	}
+}
+func main() {
+	fmt.Println(fi2(3))
+	fmt.Println("---------------")
+	f := fi()
+	for i := 0; i < 3; i++ {
+		fmt.Println(f())
+	}
+}
