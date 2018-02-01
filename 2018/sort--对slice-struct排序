@@ -1,0 +1,18 @@
+package main
+
+import (
+	"fmt"
+	"sort"
+)
+
+type Stu struct {
+	No   int
+	Name string
+}
+
+func main() {
+//按照学生学号正序输出
+	s := []Stu{{1, "zhangsan"}, {3, "lisi"}, {5, "wangwu"}, {2, "zhaoliu"}}
+	sort.Slice(s, func(i, j int) bool { return s[i].No < s[j].No })
+	fmt.Printf("%#v", s)
+}
