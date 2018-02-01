@@ -4,7 +4,7 @@ import "fmt"
 
 //递归
 func fi2(x int) int {
-	if x <= 2 {
+	if x == 1 || x == 2  {
 
 		return 1
 	}
