@@ -1,0 +1,29 @@
+使用 interface{} 作为可变参数时，注意参数类型以及不支持混合参数。
+
+package main
+
+import (
+	"fmt"
+)
+
+func test(args ...interface{}) {
+	fmt.Println(args)
+}
+func test2(args ...int) {
+	fmt.Println("test2:", args)
+}
+
+func main() {
+	arg1 := 0
+	arg2 := []int{1, 2, 3}
+	arg3 := []interface{}{4, 5, 6}
+	test(arg1)
+	test(arg2)
+	test(arg3)
+
+	//test(arg2...) //类型不一致，因为test参数是interface
+	test2(arg2...)
+	test(arg3...)
+	//test(arg1, arg3...) //不支持混合参数
+
+}
