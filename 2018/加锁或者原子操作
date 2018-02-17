@@ -1,0 +1,35 @@
+
+
+需要了解a = a + 1是一个三步操作，寄存器取a，a+1，放回寄存器，在多线程情况下，同时操作同一元素，这三步操作不能保证原子性。这个时候需要加锁或者原子操作。
+
+package main
+
+import(
+    "sync"
+	"fmt"
+	//"sync/atomic"
+	
+)
+
+func main() {
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+    var count int32 = 0
+    for i := 0; i <10; i++{
+        wg.Add(1)
+        go func(i int){
+			defer wg.Done()
+			mu.Lock()
+			count++
+      //第二种：原子操作
+			//atomic.AddInt32(&count, 1)
+			//atomic是最轻量级的锁,在一些场景下直接使用atomic包还是很有效的。
+			//原子操作共有5种，即：增或减、比较并交换、载入、存储和交换
+			fmt.Println(count)
+			
+			mu.Unlock()
+        }(i)
+    }
+    wg.Wait()
+    
+}
