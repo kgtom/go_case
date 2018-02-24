@@ -1,4 +1,9 @@
 
+1.升级到go1.10
+mac: brew upgrade go
+
+2.体验
+https://tonybai.com/2018/02/17/some-changes-in-go-1-10/
 
 reference:
 https://medium.com/@thuc/whats-changes-in-golang-1-10-d3022fbade3c
