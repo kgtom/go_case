@@ -1,0 +1,5 @@
+
+Context优点：简洁的方式管理goroutines的生命周期。
+
+reference:
+https://www.cnblogs.com/zhangboyu/p/7456606.html
