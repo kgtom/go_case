@@ -1,0 +1,5 @@
+经验教训
+由于go大量的官方库、第三方库使用了context，所以调用接收context的函数时要小心，要清楚context在什么时候cancel，什么行为会触发cancel。
+在程序经常使用gRpc传出来的context，产生了一些非预期的结果，之后花时间总结了gRpc、内部基础库中context的生命期及行为，以避免出现同样的问题。
+reference:
+https://zhuanlan.zhihu.com/p/34417106
