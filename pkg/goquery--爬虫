@@ -1,0 +1,53 @@
+
+
+注意点：
+1.采取不同方法获取内容 doc 进行解析
+NewDocumentFromNode(root *html.Node) *Document: 传入 *html.Node 对象，也就是根节点。
+NewDocument(url string) (*Document, error): 传入 URL，内部用 http.Get 获取网页。
+NewDocumentFromReader(r io.Reader) (*Document, error): 传入 io.Reader，内部从 reader 中读取内容并解析。
+NewDocumentFromResponse(res *http.Response) (*Document, error): 传入 HTTP 响应，内部拿到 res.Body(实现了 io.Reader) 后的处理方式类似 NewDocumentFromReader.
+
+2.确保需要的数据在doc中存在，然后链式调用的方式去找。
+func GetDoc(url string) (*goquery.Document, error) {
+	log.Infof("url=%s", url)
+	res, err := http.Get(url)
+	if err != nil {
+		// handle error
+	}
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		// handle error
+	} 
+
+	fmt.Println(string(body))
+	
+	defer res.Body.Close()
+	
+	utfBody, err := iconv.NewReader(res.Body, "utf-8", "utf-8")
+	if err != nil {
+		// handler error
+	}
+
+	// use utfBody using goquery
+	doc, err := goquery.NewDocumentFromReader(utfBody)
+	if err != nil {
+		// handler error
+	}
+
+	return doc, nil
+}
+
+或者：
+
+func GetDoc(url string) (*goquery.Document, error) {
+   doc, err := goquery.NewDocument(url)
+	 if err != nil {
+	 	return nil, err
+	 }
+  
+  	return doc, nil
+}
+
+reference:
+https://github.com/PuerkitoBio/goquery
+http://liyangliang.me/posts/2016/03/zhihu-go-insight-parsing-html-with-goquery/
