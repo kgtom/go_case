@@ -1,0 +1,71 @@
+
+//互斥锁的使用
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+var (
+	count int
+	mux   sync.Mutex
+	wg    sync.WaitGroup
+)
+
+func main() {
+
+	wg.Add(1)
+	go func() {
+		for i := 0; i < 5; i++ {
+			mux.Lock()
+			count++
+			mux.Unlock()
+		}
+		wg.Done()
+	}()
+	for i := 0; i < 5; i++ {
+		mux.Lock()
+		count++
+		mux.Unlock()
+	}
+	wg.Wait()
+
+	fmt.Println("count:", count)
+}
+
+
+
+
+
+//原子操作，不需加锁，也能保证数据的一致性,并且速度最快
+package main
+
+import (
+	"fmt"
+	"sync"
+	"sync/atomic"
+)
+
+var (
+	count int32
+	mux   sync.Mutex
+	wg    sync.WaitGroup
+)
+
+func main() {
+
+	wg.Add(1)
+	go func() {
+		for i := 0; i < 5; i++ {
+			atomic.AddInt32(&count, 1)
+		}
+		wg.Done()
+	}()
+	for i := 0; i < 5; i++ {
+		atomic.AddInt32(&count, 1)
+	}
+	wg.Wait()
+
+	fmt.Println("count:", count)
+}
