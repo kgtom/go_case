@@ -42,5 +42,6 @@ func main() {
 netpoll的最终的效果就是用户层阻塞，底层非阻塞。当goroutine读或写被阻塞时会被放到等待队列，这个goroutine失去了运行权，但并不是真正的整个系统“阻塞”于系统调用。而通过后台的poller不停地poll，所有的文件描述符都被添加到了这个poller中的，当某个时刻一个文件描述符准备好了，poller就会唤醒之前因它而阻塞的goroutine，于是goroutine重新运行起来。
 
 reference:
+https://golang.org/src/runtime/netpoll.go
 https://tonybai.com/2015/11/17/tcp-programming-in-golang/
 http://www.opscoder.info/golang_netpoller.html
