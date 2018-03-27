@@ -1,0 +1,208 @@
+0x00 回顾TCP
+
+TCP(Transmission Control Protocol 传输控制协议)是一种面向连接(连接导向)的、可靠的、 基于IP的传输层协议。用一个图介绍连接、数据传输、断开连接，即如下图所示：
+
+三次握手四次挥手
+
+
+
+0x01 IO多路复用
+
+原始的TCP socket开发中，偏向于底层，基本利用系统调用和操作系统交互。涉及几个概念：
+
+同步
+
+异步
+
+阻塞
+
+非阻塞
+
+在实际业务使用中，从高性能的角度考虑，经典的使用方式为：Reactor模式的IO多路复用。
+
+整个实现模型还是比较复杂，涉及到几个关键、复杂的模块：
+
+多线程；
+
+工作线程池；
+
+任务队列；
+
+复用IO；
+
+定时器模型；
+
+因此，出现了许多高性能IO多路复用框架：如：libevent/libev/libuv等。目的是降低开发者的开发复杂度。
+
+0x02 go中TCP网络编程
+
+go设计的目标之一就是面向大规模后端服务程序，网络通信又是至关重要的一部分。go中暴露给语言使用者的tcp socket api是建立在OS原生tcp socket接口之上，其中配合了go runtime的调度需要，所以和OS原生接口存在差别。
+
+相对于传统的
+IO多路复用
+框架，go语言直接将"复杂性"隐藏在Runtime中。
+Go开发者无需关注socket是否是non-block的，也无需亲自注册文件描述符的回调，只需在每个连接对应的goroutine中以“block I/O”的方式对待socket处理即可
+。
+
+
+
+由上图显示，串行流程符合人的思维模式，很容易理解，简单实用。其中，service handler可以利用go中interface特性实现通用套用思想。
+
+type ServiceManager interface {
+    Handler(conn Connection)
+}
+其中，Handler实例实现如下：
+
+func (s *ServiceManage) Handler(conn wolsocket.Connection) {
+    // 处理连接
+    agent, err := s.acceptConnect(conn)
+    if err != nil {
+        // todo: 错误处理
+        glog.Warningf("handler connect error: %s", err.Error())
+        return
+    }
+
+    // 处理数据
+    for {
+        data, err := agent.Connection.Read()
+        if err != nil {
+            break
+        }
+
+        ....
+    }
+    return
+}
+用户层眼中看到的goroutine中的“block socket”，实际上是通过Go runtime中的netpoller通过Non-block socket + I/O多路复用机制“模拟”出来的，真实的底层socket实际上是non-block的，只是runtime拦截了底层socket系统调用的错误码，并通过netpoller和goroutine调度让goroutine“阻塞”在用户层得到的conn上。比如：当用户层针对某个socket conn发起read操作时，如果该socket conn中尚无数据，那么runtime会将该socket conn加入到netpoller中监听，同时对应的goroutine被挂起，直到runtime收到socket conn数据ready的通知，runtime才会重新唤醒等待在该socket conn上准备read的那个goroutine。而这个过程从goroutine的视角来看，就像是read操作一直block在那个socket conn上似的。
+
+0x03 读写细节
+conn.Read
+
+socket无数据：read阻塞，直到有数据。
+
+socket有部分数据：如果socket中有部分数据，且长度小于一次Read操作所期望读出的数据长度，那么Read将会成功读出这部分数据并返回，而不是等待所有期望数据全部读取后再返回。
+
+socket有足够数据：如果socket中有数据，且长度大于等于一次Read操作所期望读出的数据长度，那么Read将会成功读出这部分数据并返回。这个情景是最符合我们对Read的期待的了：Read将用Socket中的数据将我们传入的slice填满后返回：n = 10, err = nil
+
+有数据，socket关闭：第一次Read成功读出了所有的数据，当第二次Read时，由于client端 socket关闭，Read返回EOF error；
+
+无数据，socket关闭：Read直接返回EOF error
+
+conn.Write
+
+成功写：Write调用返回的n与预期要写入的数据长度相等，且error = nil；
+
+写阻塞：当发送方将对方的接收缓冲区以及自身的发送缓冲区写满后，Write就会阻塞；
+
+写入部分数据：Write操作存在写入部分数据的情况，没有按照预期的写入所有数据，则需要循环写入。
+
+应用层面的read和write并发安全性
+
+每次Write操作都是受lock保护，直到此次数据全部write完。因此在应用层面，要想保证多个goroutine在一个conn上write操作的Safe，需要一次write完整写入一个“业务包”；一旦将业务包的写入拆分为多次write，那就无法保证某个Goroutine的某“业务包”数据在conn发送的连续性。
+
+Read操作，也是lock保护的。多个goroutine对同一conn的并发读不会出现读出内容重叠的情况，但内容断点是依 runtime调度来随机确定的。存在一个业务包数据，1/3内容被goroutine-1读走，另外2/3被另外一个goroutine-2读 走的情况。比如一个完整包：world，当goroutine的read slice size < 5时，存在可能：一个goroutine读到 “worl”,另外一个goroutine读出”d”。
+
+socket关闭
+
+从client的结果来看，在己方已经关闭的socket上再进行read和write操作，会得到”use of closed network connection” error；
+
+从server的执行结果来看，在对方关闭的socket上执行read操作会得到EOF error，但write操作会成功，因为数据会成功写入己方的内核socket缓冲区中，即便最终发不到对方socket缓冲区了，因为己方socket并未关闭。因此当发现对方socket关闭后，己方应该正确合理处理自己的socket，再继续write已经无任何意义了
+
+0x04 连接保活
+必要性
+
+很多防火墙等对于空闲socket自动关闭；
+
+对于非正常断开, 服务器并不能检测到. 为了回收资源, 必须提供一种检测机制。
+
+保活方式
+
+keep-alive：tcp层保活。当我们了解tcp socket时，一般看到keep-alive会以为采用该方式保活挺好。但是实际上该方式存在问题，很多时候并不能起到保活的作用。比如：socks协议只管转发TCP层具体的数据包，而不会转发TCP协议内的实现细节的包（也做不到），一旦使用sokets代理就直接失效了，所以考虑到真实复杂的网络环境，还是不要用。
+
+应用层heartbeat：业务层，发送心跳包保活：client发送/server发送。真实的场景中使用client发送的方式实现。
+
+超时检测
+
+定时器模型：常用做法是利用go中timer功能，为每一个conn维护一个timer，保证可以预期超时检查conn timestamp的更新情况。
+
+go中read block模型：该方式简单好用，灵活利用go socket conn中read block的特性。即在每一次read之前设置
+SetReadDeadline
+保证read可以阻塞超时，达到连接超时的检测效果。
+
+func (c *Connection) Read() ([]byte, error) {
+    // 设置read超时
+    c.Conn.SetReadDeadline(time.Now().Add(70 * time.Second))
+
+    // 先读取长度
+    lenData := make([]byte, CONNECTION_SIZE_BUF)
+    _, err := io.ReadFull(c.Conn, lenData)
+    if err != nil {
+        return nil, fmt.Errorf("socket read data length error: %s", err.Error())
+    }
+    .....
+    return d, nil
+}
+
+
+
+
+0x05 数据封装
+
+只要涉及到网络通信，通信双方就必须协商好通信的封装形式。这里讲的数据封装包括两个方面：
+
+byte封装：socket通信中byte data的一级封装，用于socket read以及为后面的proto解析做准备；
+
+proto封装：具体的业务data的封装协议约定；
+
+byte封装
+
+byte封装主要体现在conn read的buf的封装上。并且可以做一些初级的认证、验证、容错操作。
+
+比如：
+
+封装CONNECTION_SIZE_BUF的buf，[0:2]作为magic认证字段，[2:CONNECTION_SIZE_BUF]作为data长度字段；
+
+利用data长度字段，做一个初级的验证、容错处理；
+
+通过data长度，make合理buf，读取数据；
+
+func (c *Connection) Read() ([]byte, error) {
+    // 设置read超时
+    c.Conn.SetReadDeadline(time.Now().Add(70 * time.Second))
+
+    // 先读取长度
+    lenData := make([]byte, CONNECTION_SIZE_BUF)
+    _, err := io.ReadFull(c.Conn, lenData)
+    if err != nil {
+        return nil, fmt.Errorf("socket read data length error: %s", err.Error())
+    }
+    // 从byte中解析出l值
+    magic := binary.BigEndian.Uint16(lenData[0:2])
+    if magic != CONNECTION_MAGIC {
+        return nil, fmt.Errorf("socket read data magic error: %x", magic)
+    }
+    l := binary.BigEndian.Uint32(lenData[2:CONNECTION_SIZE_BUF])
+    if l > CONN_MAX_DATA_LEN {
+        return nil, fmt.Errorf("data len big: %d", l)
+    }
+
+    // 准备读取数据
+    d := make([]byte, l)
+    realLen, err := io.ReadFull(c.Conn, d)
+    if err != nil {
+        return nil, fmt.Errorf("socket read data(len=%d) error: %s", l, err.Error())
+    }
+    if realLen != int(l) {
+        return nil, fmt.Errorf("data len is error: reallen(%d) != len(%d)", realLen, l)
+    }
+
+    return d, nil
+}
+proto封装
+
+对于proto的封装，现在比较流行的有json、pb等方式，这个一般和业务相关性比较大，只要业务层通信双方协商一致，同一个网络服务中存在多种协议的都可以。
+
+
+
+reference:
+https://www.secpulse.com/archives/65730.html
