@@ -1,0 +1,9 @@
+总结：
+1.效率 VS 时间 ，例如：强一致性和弱一致性
+2.算法优化
+3.pprof使用
+
+
+reference:
+https://stackimpact.com/blog/benchmark-profiling-with-pprof/
+https://stackimpact.com/docs/go-performance-tuning/
