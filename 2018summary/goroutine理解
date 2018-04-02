@@ -1,0 +1,30 @@
+第一 goroutine的实现：
+
+goroutine就是Go语言提供的一种用户态线程，
+当然这种用户态线程是跑在内核级线程之上的。当我们创建了很多的goroutine，并且它们都是跑在同一个内核线程之上的时候，
+就需要一个调度器来维护这些goroutine，确保所有的goroutine都使用cpu，并且是尽可能公平的使用cpu资源。
+
+地鼠(gopher)用小车运着一堆待加工的砖。M就可以看作图中的地鼠，P就是小车，G就是小车里装的砖。
+如果G 太多了，需要创建更多个M 去干活。
+没有P，M是不能运转的。
+一个M坏了，runtime 将G 放到仓库中(全局队列中)
+
+
+第二 goroutine 和线程的区别：
+1.内存占用： 2KB VS 1M，创建多了，OutOfMemory
+2.创建和销毁的开销：
+goroutine有自己的runtime运行时处理，不需要人工处理；线程从os请求资源，之后再释放，即使是线程池，开销也较大。
+3.切换开销：
+goroutine:非抢占式，协同合作，切换时只保留三个寄存器即可(程序指针、栈指针、DX)
+线程调度是抢占式，切换/恢复时需要保存16寄存器。开销较大。
+
+第三 常见goroutine 阻塞：
+  网络收发、睡眠、channel操作、sync包一些会堵塞的操作
+不会造成线程堵塞，因为runtime将气体goroutine 调度到其它线程去运行。
+
+
+
+
+reference:
+https://www.zhihu.com/question/20862617/answer/131341519
+https://zhuanlan.zhihu.com/p/28381197
