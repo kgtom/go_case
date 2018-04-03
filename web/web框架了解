@@ -1,0 +1,21 @@
+第一 golang 的 web 框架大致分两类：
+
+Httprouter 框架:gin，使用的数据结构被称为 radix Trie 压缩字典树。
+mvc 类框架:beego
+
+第二：中间件作用：解耦业务代码和非业务代码，对 日志、路由、鉴权等操作。
+     gin:  gin.HandlerFunc 的函数类型
+     
+     
+
+
+
+reference:
+https://github.com/julienschmidt/httprouter
+Trie:http://dsqiu.iteye.com/blog/1705697
+https://blog.csdn.net/hihozoo/article/details/51248823
+
+ps:
+字典树：插入和查询的效率很高，均是O（m），其中 m 是待插入/查询的 字符串长度，但空间消耗大。
+       用于字符串检索，前缀匹配、词频统计等。
+二叉树：查询效率快于 字典树。
