@@ -11,7 +11,7 @@ goroutine就是Go语言提供的一种用户态线程，
 
 
 第二 goroutine 和线程的区别：
-1.内存占用： 2KB VS 1M，创建多了，OutOfMemory
+1.内存占用： 2KB VS 1M，创建多了，栈溢出 vs OutOfMemory,为了防止栈溢出，runtime 栈分裂，创建一个原先2倍的栈空间。
 2.创建和销毁的开销：
 goroutine有自己的runtime运行时处理，不需要人工处理；线程从os请求资源，之后再释放，即使是线程池，开销也较大。
 3.切换开销：
