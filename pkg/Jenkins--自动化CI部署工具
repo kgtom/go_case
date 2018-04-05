@@ -1,7 +1,4 @@
-reference:
-https://github.com/jenkinsci/jenkins
-http://www.jianshu.com/p/b524b151d35f
-https://jimmysong.io/kubernetes-handbook/practice/jenkins-ci-cd.html
+
 
 
 为什么使用：免费，资料多；自动化编译、打包、部署，可以定时及hook进行其他业务处理。
@@ -18,10 +15,15 @@ Jenkins可以帮你在写完代码后，一键完成开发过程中的一系列�
 
 应用构建和发布流程说明:
 
+流程：开发人员pull 代码---》git hook 触发Jenkins build(或者Jenkins 主动来获取)---》推送docker到私有镜像仓库(阿里云)---》rancher compose 分布式部署服务
+
 用户向Github 提交代码，代码中必须包含Dockerfile
 将代码提交到远程仓库
 用户在发布应用时需要填写git仓库地址和分支、服务类型、服务名称、资源数量、实例个数，确定后触发Jenkins自动构建(分发给分布式编译器)
 Jenkins的CI流水线自动编译代码并打包成docker镜像推送到 私有镜像仓库
 Rancher(hook)获取到最新的docker镜像，部署应用
 
-
+reference:
+https://github.com/jenkinsci/jenkins
+http://www.jianshu.com/p/b524b151d35f
+https://jimmysong.io/kubernetes-handbook/practice/jenkins-ci-cd.html
