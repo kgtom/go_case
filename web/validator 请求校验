@@ -1,0 +1,8 @@
+
+struct验证使用：https://github.com/go-playground/validator
+
+err := validate.Struct(mystruct)
+validationErrors := err.(validator.ValidationErrors)
+
+提示哪个字段有问题的话，通过tag就行处理。
+
