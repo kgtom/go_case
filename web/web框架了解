@@ -1,10 +1,19 @@
-第一 golang 的 web 框架大致分两类：
+ 第一 golang 的 web 框架大致分两类：
 
-Httprouter 框架:gin，使用的数据结构被称为 radix Trie 压缩字典树。
-mvc 类框架:beego
+  Httprouter 框架:gin，使用的数据结构被称为 radix Trie 压缩字典树。
+  mvc 类框架:beego
 
-第二：中间件作用：解耦业务代码和非业务代码，对 日志、路由、鉴权等操作。
+ 第二：中间件作用：解耦业务代码和非业务代码，对 日志、路由、鉴权等操作。
      gin:  gin.HandlerFunc 的函数类型
+     
+     
+ 第三：常见web框架分层：
+ 
+ 常见MVC，大多数项目都是前后端分离，所以 V：用到vue或者react ,
+       后端： controller --->logic ---->model :
+           c：路由、参数验证、请求转发
+           logic：专注业务处理，合理运用设计模式
+           m:与db 交互，curd功能
      
      
 
