@@ -1,0 +1,9 @@
+IoC：解除两个模块间的直接依赖关系。
+
+目前web框架：
+controller --->logic---->(dao)model.
+
+问题在于：dao 变动了，必须修改logic，logic核心代码变动，势必增加代码风险。两者是强依赖关系。
+解决：controller --->logic（引入interface）---->(dao)model.
+
+ 引入 interface,定义方法，让dao 实现其方法，这样logic 不必强依赖与dao。dao变化也不影响logic。
