@@ -1,0 +1,19 @@
+
+
+Go使用SQL与类SQL数据库的惯例是通过标准库database/sql。这是一个对关系型数据库的通用抽象，它提供了标准的、轻量的、面向行的接口。
+它可以创建语句(statement)和事务(transaction)，执行查询，获取结果。
+使用数据库时，除了database/sql包本身，还需要引入想使用的特定数据库驱动。
+例如：使用PG:github.com/lib/pq
+
+在web开发中，常用的两种方式： orm 和sql builder 
+
+orm:xorm 、gorm、beegoOrm等。 优点:快速上手、适合小项目。不足：隐藏了太多细节，有时候不能很好满足业务需求。
+sql builder：squirrel等。 优点：没有隐藏太多细节，自己可以包装一些通用的方法。 不足：高并发系统，风控需要考虑，这时候需要引入dba,做
+  系统上线前的sql review工作。
+  
+综合这两种不足，当项目引入dba的时候，需要把sql 放在明显地方，便于dba review，即：把dao 层开放给dba.
+  
+
+reference:
+https://yq.aliyun.com/articles/178898?utm_content=m_29337
+https://my.oschina.net/u/168737/blog/1531834
