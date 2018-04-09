@@ -1,8 +1,3 @@
----
-
-
----
-
 <h3 id="closure-的介绍">closure 的介绍</h3>
 <hr>
 <pre class=" language-go"><code class="prism  language-go"><span class="token keyword">package</span> main
