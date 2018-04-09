@@ -1,0 +1,34 @@
+
+//总结：主要考察for 的使用及 isExists变量应用的思路
+
+package main
+
+import (
+	"fmt"
+)
+
+const (
+	THREE = 3
+	SIX   = 6
+)
+
+func main() {
+	fmt.Println("app start")
+	var isExists bool
+	for i := 0; i < 100; i++ {
+		isExists = false
+		if i%THREE == 0 {
+			fmt.Println("d3",i)
+			isExists = true
+		}
+		if i%SIX == 0 {
+			fmt.Println("d6",i)
+			isExists = true
+		}
+		if !isExists {
+			fmt.Println("not match num:", i)
+		}
+	}
+	
+	fmt.Println("app end")
+}
