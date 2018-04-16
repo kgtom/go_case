@@ -1,1 +1,184 @@
+package main
+
+import (
+	"fmt"
+	"log"
+	"strconv"
+	"time"
+
+	"database/sql"
+
+	"github.com/tealeg/xlsx"
+
+	_ "github.com/lib/pq"
+)
+
+var Db *sql.DB
+var booksList []Books
+
+type Books struct {
+	CompanyId   int
+	CategoryId  int
+	LocationId  int
+	Type        int
+	Name        string
+	Code        string
+	Count       int
+	BorrowCount int
+	LocationRow int
+	State       int
+	CreateTime  string
+	Date        string
+}
+
+type Logs struct {
+	Content string
+}
+
+func init() {
+
+	connStr := "user=oadev dbname=oadev password=fs2017 host=192.168.0.11 sslmode=disable"
+	db, err := sql.Open("postgres", connStr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	Db = db
+}
+
+func main() {
+
+	excelFileName := "/Users/tom/Desktop/exportDB.xlsx"
+	xlFile, err := xlsx.OpenFile(excelFileName)
+	if err != nil {
+		fmt.Println("err:", err)
+	}
+
+	for _, sheet := range xlFile.Sheets {
+		for i, row := range sheet.Rows {
+			if i == 0 {
+				continue
+			}
+			var b Books
+			b.CompanyId = 28
+			b.State = 1
+			b.Type = 6
+			b.CreateTime = time.Now().Format("2006-01-02 15:04:05")
+			b.Date = time.Now().Format("2006-01-02")
+			for idx, cell := range row.Cells {
+
+				fmt.Println("idx:", idx, "text:", cell.Value)
+				switch idx {
+				case 0:
+					b.Code = cell.Value
+				case 1:
+
+					b.CategoryId = ConvertStringToInt(cell.Value)
+				case 2:
+
+					b.Name = cell.Value
+				case 3:
+					b.Count = ConvertStringToInt(cell.Value)
+				case 4:
+					b.LocationId = ConvertStringToInt(cell.Value)
+				case 5:
+					b.LocationRow = ConvertStringToInt(cell.Value)
+
+				default:
+					break
+				}
+
+			}
+			booksList = append(booksList, b)
+		}
+	}
+
+	fmt.Println("list:", booksList)
+	//testExcel()
+	//insertDb(&booksList)
+	//updateDb(&booksList)
+}
+
+func ConvertStringToInt(s string) (i int) {
+	id, err := strconv.Atoi(s)
+	if err != nil {
+		return 0
+	}
+	return id
+}
+func insertDb(arr *[]Books) {
+
+	tx, err := Db.Begin()
+	if err != nil {
+		log.Fatal("tx b:", err)
+	}
+	defer tx.Rollback()
+	for i, v := range *arr {
+
+		res, err := tx.Exec(`INSERT INTO resource_items (company_id, category_id, location_id, type, name,code,count,location_row,state,sort,create_time,date)
+	VALUES ($1, $2, $3, $4, $5,$6,$7,$8,$9,$10,$11,$12)`, v.CompanyId, v.CategoryId, v.LocationId, v.Type, v.Name, v.Code, v.Count, v.LocationRow, v.State, i, v.CreateTime, v.Date)
+
+		if err != nil {
+			fmt.Println("insert err:", err)
+		}
+		res, err = tx.Exec(`INSERT INTO logs(content,create_by,create_time) values($1,$2,$3)`, "管理员修改", 46, time.Now().Format("2006-01-02 15:04:05"))
+		if err != nil {
+			fmt.Println("insert log err:", err)
+		}
+		fmt.Println("insert affected:", res)
+
+	}
+	err = tx.Commit()
+	if err != nil {
+		log.Fatal("tx c:", err)
+	}
+
+}
+
+func updateDb(arr *[]Books) {
+	tx, err := Db.Begin()
+	if err != nil {
+		log.Fatal("tx b:", err)
+	}
+	defer tx.Rollback()
+	for _, v := range *arr {
+
+		res, err := tx.Exec(`update   resource_items  set location_id=$1 ,location_row=$2 where code=$3`, v.LocationId, v.LocationRow, v.Code)
+
+		if err != nil {
+			fmt.Println("insert err:", err)
+		}
+		res, err = tx.Exec(`INSERT INTO logs(content,create_by,create_time) values($1,$2,$3)`, "管理员修改柜号", 46, time.Now().Format("2006-01-02 15:04:05"))
+		if err != nil {
+			fmt.Println("insert log err:", err)
+		}
+		fmt.Println("insert affected:", res)
+
+	}
+	err = tx.Commit()
+	if err != nil {
+		log.Fatal("tx c:", err)
+	}
+}
+func testExcel() {
+
+	var f *xlsx.File
+	f = xlsx.NewFile()
+	sheet, _ := f.AddSheet("test")
+
+	type interfaceA []interface{}
+
+	s4 := interfaceA{"tom", 10, 12, true, time.Unix(0, 0)}
+	row4 := sheet.AddRow()
+	cnt := row4.WriteSlice(&s4, -1)
+
+	fmt.Println("cnt:", cnt)
+	err := f.Save("MyXLSXFile.xlsx")
+	if err != nil {
+		fmt.Printf(err.Error())
+	}
+}
+
+
+
+reference:
 https://github.com/tealeg/xlsx
