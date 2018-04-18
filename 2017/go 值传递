@@ -7,21 +7,20 @@ func main() {
 	var m map[int]int
 	fmt.Println("m1:", m) //map[]
 	fn(m)
-	fmt.Println("m1->:", m)
+	fmt.Println("m1->:", m) //map[]
 	//m[1] = 1 //assignment to entry in nil map，未make初始化不能赋值, 没有申请内存地址
 	fmt.Println(m == nil) //true
 
 	var m2 = make(map[int]int)
-	fmt.Println("m2:", m2)
-	fn2(m2) //
+	fmt.Println("m2:", m2) //map[]
+	fn2(m2)                //
 
 	fmt.Println("m2->:", m2) //[1:100 2:200]
 
 	m3 := make(map[int]int)
-	fmt.Println("m3", m3)
+	fmt.Println("m3", m3) //map[]
 	fn3(m3)
-	fmt.Println("m3->", m3)
-
+	fmt.Println("m3->", m3) //[3:3]
 }
 func fn3(m map[int]int) {
 	m[3] = 3
@@ -31,7 +30,7 @@ func fn(m map[int]int) {
 	m = make(map[int]int)
 	m[1] = 100
 	m[2] = 200
-	fmt.Println(m) // map[1:100 2:200]
+	fmt.Println("fn:", m) // map[1:100 2:200]
 }
 
 func fn2(m map[int]int) {
