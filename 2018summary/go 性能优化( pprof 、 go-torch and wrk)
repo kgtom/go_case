@@ -1,0 +1,100 @@
+重点介绍：
+查看内存信息：
+go tool pprof http://localhost:8080/debug/pprof/heap
+查看程序CPU使用情况信息：
+go tool pprof http://localhost:8080/debug/pprof/profile
+
+
+
+
+CPU 分析：
+
+pprof 使用步骤：
+1.压力测试 35s 1W次高并发场景模
+go-wrk -d 35 -n 10000 http://localhost:8080/test
+
+
+2.压力测试执行中
+go tool pprof --seconds 25 http://localhost:8080/debug/pprof/profile
+
+采样完毕之后自动进入 pprof 的交互命令行界面：
+使用 top N 查看前N条使用情况
+使用 web  （需要先安装 graphviz，macOS 下可以 brew install graphviz）,生成svg在浏览器查看即可
+
+
+go-torch Go的各个方法所占用的CPU的时间。使用步骤：
+
+第一种 go-torch  web 使用步骤：
+1.在执行 wrk 压测的同时运行：
+
+go-torch http://localhost:8080/debug/pprof/profile
+2.展开 main.Handler ，查看到每一个函数消耗多少时间
+
+第二种 go-torch 抛开网络开销，使用 golang 提供的 benchmark。
+
+1. 性能测试
+package main
+
+import "testing"  
+import "net/http/httptest"  
+import "net/http"
+
+func BenchmarkHandler(b *testing.B) {  
+    for i := 0; i < b.N; i++ {
+        req, err := http.NewRequest(
+            http.MethodGet, "http://localhost:8080/test",
+            nil,
+        )
+        if err != nil {
+            b.Error("err")
+        }
+        res := httptest.NewRecorder()
+        handler(res, req)
+        if res.Code != http.StatusOK {
+            b.Error("res err")
+        }
+    }
+}
+
+2. go test -bench . -cpuprofile cpu.prof
+
+3.压测过程中，go-torch来生成采样报告：
+go-torch --alloc_objects -t 5 --colors=mem localhost:8080/debug/pprof/heap
+
+ 火焰图的y轴表示cpu调用方法的先后，x轴表示在每个采样调用时间内，方法所占的时间百分比，越宽代表占据cpu时间越多。
+
+
+内存分析：
+
+go-torch：不需要采样。随意压测一段时间，然后直接运行：
+
+1.go-torch --alloc_objects -t 5 --colors=mem localhost:8080/debug/pprof/heap
+2.再次结合 pprof 中 list \web 进行综合分析
+ 
+小坑：
+1.使用go-torch  是需要安装：
+参考：https://github.com/uber/go-torch
+
+git clone https://github.com/brendangregg/FlameGraph.git
+
+cd FlameGraph
+cp flamegraph.pl /usr/local/bin
+
+2.
+go tool pprof --seconds 25 http://localhost:8080/debug/pprof/profile
+在当前目录生成torch.svg
+
+3.想要知道每个函数消耗多长时间
+(pprof) list handler
+
+4.去掉网络传输的干扰
+   使用单元测试，不走http请求
+
+5. 内存分析
+go-torch --alloc_objects -t 5 --colors=mem localhost:8080/debug/pprof/heap   
+
+总结：性能优化 VS 代码可读性 需要平衡，最重要的是写好注释。
+
+reference:
+
+https://blog.csdn.net/WaltonWang/article/details/54019891
