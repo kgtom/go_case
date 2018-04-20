@@ -1,0 +1,22 @@
+Gateway
+Gateway 是一个基于HTTP协议的restful的API网关。可以作为统一的API接入层。
+
+Features
+流量控制
+熔断
+负载均衡
+服务发现
+插件机制
+路由(分流，复制流量)
+API 聚合
+API 参数校验
+API 访问控制（黑白名单）
+API 默认返回值
+API 定制返回值
+API 结果Cache
+后端server的健康检查
+开放管理API(GRPC、Restful)
+
+reference:
+
+https://github.com/fagongzi/gateway
