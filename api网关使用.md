@@ -303,4 +303,9 @@ fmt<span class="token punctuation">.</span><span class="token function">Println<
 
   <span class="token punctuation">}</span>
 </code></pre>
+<p>5.测试</p>
+<p>访问<br>
+订单api: 192.168.0.9/api/v1/test1<br>
+库存api: 192.168.0.9/api/v2/test1</p>
+<p>6.总结 最重要精细化管理每一个对外的api。</p>
 
