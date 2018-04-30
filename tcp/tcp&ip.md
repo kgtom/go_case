@@ -116,8 +116,7 @@
 <li>浏览器发送请求获取嵌入在 HTML 中的资源（如图片、音频、视频、CSS、JS等等）</li>
 <li>. 浏览器发送异步请求</li>
 </ul>
-<p>作者：白伟业<br>
-链接：<a href="https://juejin.im/post/5ad4094e6fb9a028d7011069">https://juejin.im/post/5ad4094e6fb9a028d7011069</a><br>
-来源：掘金<br>
-著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。</p>
+<p>reference:<br>
+<a href="https://juejin.im/post/5ad4094e6fb9a028d7011069">https://juejin.im/post/5ad4094e6fb9a028d7011069</a><br>
+
 
