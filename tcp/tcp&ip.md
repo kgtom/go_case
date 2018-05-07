@@ -118,12 +118,15 @@
 </ul>
 
 【问题1】为什么连接的时候是三次握手，关闭的时候却是四次握手？
+
 答：因为当Server端收到Client端的SYN连接请求报文后，可以直接发送SYN+ACK报文。其中ACK报文是用来应答的，SYN报文是用来同步的。但是关闭连接时，当Server端收到FIN报文时，很可能并不会立即关闭SOCKET，所以只能先回复一个ACK报文，告诉Client端，"你发的FIN报文我收到了"。只有等到我Server端所有的报文都发送完了，我才能发送FIN报文，因此不能一起发送。故需要四步握手。
 
 【问题2】为什么TIME_WAIT状态需要经过2MSL(最大报文段生存时间)才能返回到CLOSE状态？
 
 答：虽然按道理，四个报文都发送完毕，我们可以直接进入CLOSE状态了，但是我们必须假象网络是不可靠的，有可以最后一个ACK丢失。所以TIME_WAIT状态就是用来重发可能丢失的ACK报文。
+
 <p>reference:<br>
 <a href="https://juejin.im/post/5ad4094e6fb9a028d7011069">https://juejin.im/post/5ad4094e6fb9a028d7011069</a><br>
+<a href="https://blog.csdn.net/whuslei/article/details/6667471">https://blog.csdn.net/whuslei/article/details/6667471<a/><br>
 
 
