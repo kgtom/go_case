@@ -1,0 +1,35 @@
+package main
+
+import "fmt"
+
+func main() {
+ ch := make(chan int, 10)
+ for i := 0; i < 10; i++ {
+  ch <- i
+ }
+ close(ch)
+ quit := make(chan struct{})
+ go func() {
+ //Loop:
+ for {
+   select {
+   case e, ok := <-ch:
+    if !ok {
+     fmt.Println("End.")
+     //break Loop //跳出for循环
+     goto Loop
+    }
+    fmt.Printf("Received: %v\n", e)
+   }
+  }
+  Loop:
+  fmt.Println("send quit")
+  quit <- struct{}{}//发送for循环结束的信号
+ }()
+ 
+ <-quit//主goroutine堵塞在这里，接收到信号后，继续往下走
+ fmt.Println("receive quit")
+ fmt.Println("stop  main")
+}
+
+//跳出for循环两种方式：break lable 和 goto lable ；区别：break标签只能用于for循环，且标签位于for循环前面，goto是指跳转到指定标签处
