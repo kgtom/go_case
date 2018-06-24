@@ -244,3 +244,40 @@ wg<span class="token punctuation">.</span><span class="token function">Done</spa
 <span class="token punctuation">}</span>
 </code></pre>
 
+
+**两个goroutine 和一个main goroutine的例子：一个产生数字，另一个计算，最后一个输出结果。
+
+~~~
+func Counter(ch chan<- int) {
+	for i := 0; i < 5; i++ {
+		ch <- i
+	}
+	close(ch)
+}
+func Squarer(ch <-chan int, res chan<- int) {
+
+	for v := range ch {
+		res <- v * v
+	}
+	close(res)
+}
+func PrintResult(res <-chan int) {
+
+	for v := range res {
+		fmt.Println("res:", v)
+	}
+}
+func main() {
+	ch := make(chan int)
+	res := make(chan int)
+
+	go Counter(ch)
+	go Squarer(ch, res)
+	PrintResult(res)
+
+}
+
+~~~
+
+  狗
+  
