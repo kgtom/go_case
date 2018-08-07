@@ -3,7 +3,7 @@
 
 ## 题目
 
-`https://leetcode-cn.com/problems/two-sum/description/
+https://leetcode-cn.com/problems/two-sum/description/
 给定一个整数数组和一个目标值，找出数组中和为目标值的两个数。
 
 你可以假设每个输入只对应一种答案，且同样的元素不能被重复利用。
@@ -14,16 +14,11 @@
 
 因为 nums[0] + nums[1] = 2 + 7 = 9
 所以返回 [0, 1]
-`
+
 
 ##  代码
 ~~~ go
-/*
- 无缓冲channel，因为无缓冲，同步作用。但会面对未知的超时的情况。读写都会堵塞，当数据未发送(未写)的时候，读堵塞；当发送(写)入时，未被读取，写会堵塞。
-     特别注意：当channel中有数据，未被消费时，接收发生在发送之前。
- 有缓冲channel,缓冲满时，写堵塞，缓冲空的时候，读堵塞。
-  goroutine泄露：开启goroutine 堵塞，无法退出。
-*/
+
 package main
 
 import (
