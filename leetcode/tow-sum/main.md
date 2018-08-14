@@ -59,6 +59,71 @@ func twoNums(nums []int, targetValue int) []int {
 
 	return idxArr
 }
+## 扩展题目
+
+`
+在数组中找 几个数的和等于某个数。例如：找四个数的和等于12
+
+`
+
+
+
+## 代码
+~~~go
+package main
+
+import (
+	"fmt"
+	"sort"
+)
+
+func main() {
+
+	arr := []int{1, 2, 5, 4, 2, 4, 1, 7}
+	r := ArrSum(arr, 12)
+	fmt.Println("r:", r)
+}
+
+func IsExist(arr []int, arrCollection [][]int) bool {
+	sort.Ints(arr)
+
+	for _, v := range arrCollection {
+		sort.Ints(v)
+		exist := true
+		for i := 0; i < len(arr); i++ {
+
+			if arr[i] != v[i] {
+				exist = false
+				break
+			}
+		}
+		if exist {
+			return exist
+		}
+
+	}
+
+	return false
+}
+
+func ArrSum(arr []int, target int) [][]int {
+	r := [][]int{}
+	for i := 0; i < len(arr); i++ {
+		for j := i + 1; j < len(arr); j++ {
+			for k := j + 1; k < len(arr); k++ {
+				for l := k + 1; l < len(arr); l++ {
+					if arr[i]+arr[j]+arr[k]+arr[l] == target {
+						currArr := []int{arr[i], arr[j], arr[k], arr[l]}
+						if !IsExist(currArr, r) {
+							r = append(r, []int{arr[i], arr[j], arr[k], arr[l]})
+						}
+					}
+				}
+			}
+		}
+	}
+	return r
+}
 
 
 ~~~
