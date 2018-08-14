@@ -59,13 +59,16 @@ func twoNums(nums []int, targetValue int) []int {
 
 	return idxArr
 }
+
+~~~
+
 ## 扩展题目
 
 `
 在数组中找 几个数的和等于某个数。例如：找四个数的和等于12
 
 `
-
+**暴力解决，注意去重问题。**
 
 
 ## 代码
