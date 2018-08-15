@@ -15,7 +15,8 @@
 
 ~~~
 
-来源：https://leetcode.com/problems/next-permutation/description/
+[来源](https://leetcode.com/problems/next-permutation/description/)
+
 
 ## 代码
 ~~~go
