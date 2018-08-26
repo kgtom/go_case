@@ -97,3 +97,55 @@ func deleteNode(head *ListNode, targetVal int) *ListNode {
 }
 
 ~~~
+
+~~~python
+#!/usr/local/bin/python3.5
+# -*- coding: utf8 -*-
+
+
+
+class ListNode():    
+    def __init__(self,value,next=None):
+        self.val=value
+        self.next=next
+ 
+def Creatlist(n):
+    if n<=0:
+        return False
+    if n==1:
+        return ListNode(1)   
+    else:
+        root=ListNode(1)
+        tmp=root
+        for i in range(2,n+1):       
+            tmp.next=ListNode(i)
+            tmp=tmp.next
+    return root           
+def printlist(head):       
+    p=head
+    while p!=None:
+        print p.val
+        p=p.next
+
+
+
+def deleteNode(node):
+        
+    node.val = node.next.val
+    node.next = node.next.next
+
+
+def main():
+    print "Create a linklist"
+    head=Creatlist(7)
+    printlist(head)
+   
+    print "___________________________"
+    deleteNode(head)   
+
+    printlist(head)
+
+if __name__ == '__main__':
+    
+   main()
+~~~
