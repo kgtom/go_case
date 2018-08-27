@@ -1,0 +1,115 @@
+
+
+
+## 题目
+请判断一个链表是否为回文链表。
+
+示例 1:
+~~~
+输入: 1->2
+输出: false
+
+~~~
+示例 2:
+
+~~~
+输入: 1->2->2->1
+输出: true
+~~~
+
+进阶：
+你能否用 O(n) 时间复杂度和 O(1) 空间复杂度解决此题？
+
+## 代码
+
+~~~go
+package main
+
+import (
+	"fmt"
+)
+
+type ListNode struct {
+	Val  int
+	Next *ListNode
+}
+
+func main() {
+
+	list := &ListNode{
+		Val: 4,
+		Next: &ListNode{
+			Val: 5,
+			Next: &ListNode{
+				Val: 1,
+				Next: &ListNode{
+					Val:  2,
+					Next: nil,
+				},
+			},
+		},
+	}
+
+	r := isPalindrome2(list)
+	fmt.Println("ret:", r)
+	//for r != nil {
+	//	fmt.Println("val:", r.Val)
+	//	r = r.Next
+	//}
+
+}
+
+//数组比较方法
+func isPalindrome(head *ListNode) bool {
+
+	arr := []int{}
+	for head != nil {
+		arr = append(arr, head.Val)
+		head = head.Next
+	}
+	l, r := 0, len(arr)-1
+	for l < r {
+		if arr[l] != arr[r] {
+			return false
+		}
+		l++
+		r--
+	}
+	return true
+}
+
+//快慢指针，反转法
+func isPalindrome2(head *ListNode) bool {
+
+	slow, fast := head, head
+	for fast != nil && fast.Next != nil {
+
+		slow = slow.Next
+		fast = fast.Next.Next
+	}
+	head2 := reveseList(slow)
+	for ; head != nil && head2 != nil; head, head2 = head.Next, head2.Next {
+
+		if head.Val != head2.Val {
+			return false
+		}
+	}
+
+	return true
+}
+
+func reveseList(head *ListNode) *ListNode {
+
+	var prev *ListNode = nil
+	curr := head
+	for curr != nil {
+		next := curr.Next
+		curr.Next = prev
+		prev = curr
+		curr = next
+	}
+	return prev
+}
+
+
+~~~
