@@ -32,60 +32,103 @@ linkedList.get(1);            //返回3
 ## 代码
 
 ~~~go
-
 package main
 
 import "fmt"
 
 type MyLinkedList struct {
+	Len        int
+	Head, Tail *Node
+}
+type Node struct {
 	Val  int
-	Next *MyLinkedList
+	Next *Node
 }
 
 /** Initialize your data structure here. */
 func Constructor() *MyLinkedList {
 
+	nd := &Node{}
+
 	return &MyLinkedList{
-		Val: 1,
-		Next: &MyLinkedList{
-			Val:  2,
-			Next: nil,
-		},
+
+		Head: &Node{Next: nd},
+		Tail: nd,
 	}
 }
 
 /** Get the value of the index-th node in the linked list. If the index is invalid, return -1. */
-func (this *MyLinkedList) Get(idx int) int {
+func (l *MyLinkedList) Get(idx int) int {
 
-	i := 1
-	for this != nil {
-
-		if i == idx {
-			return this.Val
-		}
-		this = this.Next
+	if idx < 0 || idx >= l.Len {
+		return -1
 	}
-	return i
+	i, curr := 0, l.Head
+	for i < idx {
+		curr = curr.Next
+		i++
+	}
+	return curr.Val
 }
 
 /** Add a node of value val before the first element of the linked list. After the insertion, the new node will be the first node of the linked list. */
-func (this *MyLinkedList) AddAtHead(val int) {
+func (l *MyLinkedList) AddAtHead(val int) {
+	nd := &Node{Val: val, Next: l.Head.Next}
+	l.Head = nd
+	l.Len++
 
 }
 
+//尾插法
 /** Append a node of value val to the last element of the linked list. */
-func (this *MyLinkedList) AddAtTail(val int) {
+func (l *MyLinkedList) AddAtTail(val int) {
+
+	l.Tail.Val = val
+	nd := &Node{}
+	l.Tail.Next = nd
+	l.Tail = nd
+
+	l.Len++
 
 }
 
+//随插法
 /** Add a node of value val before the index-th node in the linked list. If index equals to the length of linked list, the node will be appended to the end of linked list. If index is greater than the length, the node will not be inserted. */
-func (this *MyLinkedList) AddAtIndex(index int, val int) {
+func (l *MyLinkedList) AddAtIndex(idx int, val int) {
 
+	switch {
+	case idx < 0 || idx >= l.Len:
+		return
+	case idx == 0:
+		l.AddAtHead(val)
+		return
+	case idx == l.Len:
+		l.AddAtTail(val)
+		return
+	}
+	i, cur := 1, l.Head
+	for i < idx {
+		i++
+		cur = cur.Next
+	}
+	nd := &Node{Val: val, Next: cur.Next}
+	cur.Next = nd
+
+	l.Len++
 }
 
 /** Delete the index-th node in the linked list, if the index is valid. */
-func (this *MyLinkedList) DeleteAtIndex(index int) {
-
+func (l *MyLinkedList) DeleteAtIndex(idx int) {
+	if idx < 0 || l.Len <= idx {
+		return
+	}
+	i, curr := 0, l.Head
+	for i < idx {
+		i++
+		curr = curr.Next
+	}
+	curr.Next = curr.Next.Next
+	l.Len--
 }
 
 /**
@@ -100,13 +143,21 @@ func (this *MyLinkedList) DeleteAtIndex(index int) {
 func main() {
 
 	obj := Constructor()
-	for obj != nil {
-		fmt.Println("val:", obj.Val)
-		obj = obj.Next
+	obj.AddAtHead(1)
+	obj.AddAtTail(3)
+	obj.AddAtIndex(1, 2)
+	//obj.DeleteAtIndex(2)
+
+	i, curr := 0, obj.Head
+	for i < obj.Len {
+		fmt.Println("val:", curr.Val)
+		i++
+		curr = curr.Next
 	}
-	getIdxVal := obj.Get(1)
-	fmt.Println("get val:", getIdxVal)
+
+	fmt.Println("get,", obj.Get(3))
 
 }
+
 
 ~~~
