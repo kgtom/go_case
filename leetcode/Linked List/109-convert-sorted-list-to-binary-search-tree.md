@@ -19,6 +19,7 @@
 ~~~
 
 **思路：**因为高度不能超过1，所以保证左右两边尽量拥有相同数量的元素，那么此题就转换到二分搜索问题了，找到中间节点，左右平分。
+
 [来源](https://leetcode-cn.com/problems/convert-sorted-list-to-binary-search-tree/hints/)
 ## 代码
 
