@@ -1,14 +1,14 @@
 
 ## 学习大纲
-* [1.从并发模型说起](#1) 
-* [2.goroutine的简介](#2) 
-* [3.goroutine的使用姿势](#3) 
-* [4.通道(channel)的简介](#4) 
-* [5.重要的四种通道使用](#5) 
-* [6.goroutine死锁与处理](#6) 
-* [7.select的简介](#7) 
-* [8.select的应用场景](#8) 
-* [9.select死锁](#9)
+* [一.从并发模型说起](#1) 
+* [二.goroutine的简介](#2) 
+* [三.goroutine的使用姿势](#3) 
+* [四.通道(channel)的简介](#4) 
+* [五.重要的四种通道使用](#5) 
+* [六.goroutine死锁与处理](#6) 
+* [七.select的应用场景](#7) 
+* [八.总结](#8) 
+
 
 
 ##  <span id="1">1.从并发模型说起</span>
@@ -56,8 +56,378 @@ func main() {
 ~~~
 
 
-## <span id="4">4.goroutine 使用</span>
+## <span id="4">4.通道(channel)的简介</span>
+~~~go
+// ** nil 发送或接收都会堵塞
+// A channel is in a nil state when it is declared to its zero value
+var ch chan string
 
+// A channel can be placed in a nil state by explicitly setting it to nil.
+ch = nil
+
+// ** open 允许发送、接收
+
+// A channel is in a open state when it’s made using the built-in function make.
+ch := make(chan string)
+
+// ** closed 可以接收，不能发送
+
+// A channel is in a closed state when it’s closed using the built-in function close.
+close(ch)
+~~~
+## <span id="5">5.重要的四种通道使用</span>
+
+[参考](http://39.106.173.209:88/channel-as-signalchang-jing-shi-yong-zong-jie/)
+### 1.无缓冲--等待任务
+
+~~~go
+package main
+
+import (
+	"fmt"
+)
+
+func doLeaderWork() {
+	fmt.Println("领导开始工作")
+}
+func doEmpWork() {
+	fmt.Println("员工开始工作")
+}
+
+func main() {
+	fmt.Println("start")
+	var ch = make(chan struct{})
+
+	// goroutine 等待领导任务
+	go func() {
+
+		doEmpWork()
+		<-ch //堵塞于此，等着 send 后执行【接收发送端数据，在发送之前，堵塞于此】
+	}()
+	doLeaderWork()
+
+	ch <- struct{}{} //领导做完后，发送信号，员工再做
+
+	fmt.Println("end")
+}
+
+~~~
+### 2.无缓冲--等待结果
+
+~~~go
+package main
+
+import (
+	"fmt"
+)
+
+func doLeaderWork() {
+	fmt.Println("领导开始工作")
+}
+func doEmpWork() {
+	fmt.Println("员工开始工作")
+}
+
+func main() {
+	fmt.Println("start")
+	var ch = make(chan struct{})
+   //员工先做，领导等待员工的结果再做
+	go func() {
+
+		ch <- struct{}{}
+		doEmpWork()
+	}()
+
+	<-ch //堵塞于此，等待员工做完后，领导再做。【接收发送在发送之前，堵塞于此】
+	doLeaderWork()
+
+	fmt.Println("end")
+}
+
+
+~~~
+
+### 3.有缓冲 无保证
+~~~go
+package main
+
+import (
+	"fmt"
+)
+
+func doLeaderWork() {
+	fmt.Println("领导开始工作")
+}
+func doEmpWork() {
+	fmt.Println("员工开始工作")
+}
+
+func main() {
+	fmt.Println("start")
+	emp := 5
+	var ch = make(chan struct{}, emp)
+
+	for i := 0; i < emp; i++ {
+		go func(who int) {
+			doEmpWork()
+			ch <- struct{}{}
+		}(i)
+
+	}
+
+	for emp > 0 {
+		<-ch //堵塞于此，等待员工做完,领导再做
+		doLeaderWork()
+		emp--
+		fmt.Println("............")
+	}
+	fmt.Println("end")
+}
+
+~~~
+
+~~~go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func doLeaderWork() {
+	fmt.Println("领导开始工作")
+}
+func doEmpWork() {
+	fmt.Println("员工开始工作")
+}
+
+func main() {
+	fmt.Println("start")
+	emp := 5
+	var ch = make(chan struct{}, emp)
+
+	go func() {
+		for _ = range ch {
+
+			doEmpWork()
+		}
+
+	}()
+	const work = 8
+	for i := 0; i < work; i++ {
+		select {
+		case ch <- struct{}{}:
+			doLeaderWork()
+		default:
+			fmt.Println("容量慢了，不能再发送了")
+
+		}
+	}
+	time.Sleep(1e9)
+	close(ch) //关闭channel，发送结束的信号给员工
+	fmt.Println("end")
+}
+
+~~~
+
+### 4.有缓冲，延迟保证
+~~~go
+package main
+
+import (
+	"fmt"
+)
+
+func doLeaderWork() {
+	fmt.Println("领导开始工作")
+}
+func doEmpWork() {
+	fmt.Println("员工开始工作")
+}
+
+func main() {
+	fmt.Println("start")
+	emp := 1
+	var ch = make(chan struct{}, emp)
+
+	go func() {
+		for _ = range ch {
+
+			doEmpWork()
+
+		}
+	}()
+	for i := 0; i < 8; i++ {
+		doLeaderWork()
+		ch <- struct{}{}
+
+	}
+	close(ch)
+
+	fmt.Println("end")
+}
+
+~~~
+## <span id="6">6.goroutine死锁与处理</span>
+### 1.死锁场景一
+~~~go
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	fmt.Println("start")
+	ch := make(chan struct{})
+	<-ch//无缓冲，只有接收，没有发生，将main goroutine堵塞于此
+
+	fmt.Println("end")
+}
+
+~~~
+输出：
+~~~
+start
+fatal error: all goroutines are asleep - deadlock!
+
+goroutine 1 [chan receive]:
+main.main()
+~~~
+
+### 2.死锁场景二
+~~~go
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	fmt.Println("start")
+	ch := make(chan struct{})
+	ch2 := make(chan struct{})
+	go func() {
+        fmt.Println("a new goroutine")
+		ch <- struct{}{}//未被接收，堵塞与此
+		ch2 <- struct{}{}
+		
+	}()
+	<-ch2
+
+	fmt.Println("end")
+}
+
+~~~
+
+
+输出：
+~~~
+start
+fatal error: all goroutines are asleep - deadlock!
+
+goroutine 1 [chan receive]:
+main.main()
+~~~
+
+### 3.死锁原因及处理
+* 原因：无缓冲channel，有发送就一定对应接收，两者缺少一个必定造成堵塞，发送死锁。
+* 处理：将没有接收或者没有发生的操作完成即可或者将无缓冲的改成有缓冲的。
+
+   - 场景一：
+   
+       ~~~go
+       package main
+
+        import (
+            "fmt"
+        )
+
+        func main() {
+            fmt.Println("start")
+            ch := make(chan struct{})
+
+            go func() {
+                ch <- struct{}{}
+                fmt.Println("a new goroutine")
+
+            }()
+            <-ch
+
+            fmt.Println("end")
+       }
+
+       ~~~
+   - 场景二---有发送与接收对应
+  
+
+     ~~~go
+     package main
+
+        import (
+            "fmt"
+        )
+
+        func main() {
+            fmt.Println("start")
+            ch := make(chan struct{})
+            ch2 := make(chan struct{})
+            go func() {
+                fmt.Println("a new goroutine")
+                ch <- struct{}{} 
+                ch2 <- struct{}{}
+
+            }()
+            <-ch
+            <-ch2
+            //time.Sleep(time.Second) //暂定一下，看一下输出结果
+
+            fmt.Println("end")
+        }
+
+     ~~~
+   -  场景二---有缓冲处理
+    
+     
+     ~~~go
+     
+        package main
+
+        import (
+            "fmt"
+        )
+
+        func main() {
+            fmt.Println("start")
+            ch := make(chan struct{}, 1) //有缓冲，放入1个不会堵塞
+            ch2 := make(chan struct{})
+            go func() {
+                fmt.Println("a new goroutine")
+                ch <- struct{}{}
+                ch2 <- struct{}{}
+
+            }()
+
+            <-ch2
+
+            fmt.Println("end")
+        }
+
+     ~~~
+## <span id="7">7.select的应用场景</span>
+
+### 1.超时作用
+
+### 2.退出作用
+
+### 3.判断channel是否已满(是否堵塞)
+
+
+
+## <span id="8">8.总结</span>
+* Goroutine: 让研发人员更加专注于业务逻辑，从os层面的逻辑抽离出来。
+* Channel:简单、安全、高效的实现了多个goroutine之间的同步与信息传递。
+* Select:可以处理多个channel。
 > reference:
 
 [csdn](https://blog.csdn.net/u011957758/article/details/81159481)
