@@ -19,7 +19,46 @@ n 是正整数,范围在 [1, 10000].
 
 ## 代码
 
+
 ~~~go
+package main
+
+import (
+	"fmt"
+)
+
+//排序后，相邻一组，然后取出每一组第一个数字相加即可。
+func main() {
+
+	arr := []int{1, 9, 4, 2}
+	ret := arrayPairSum(arr)
+	fmt.Println("ret:", ret)
+
+}
+func arrayPairSum(nums []int) int {
+	var newArr = [10]int{} //最大不超9的元素值
+	for k, v := range nums {
+		fmt.Println("v:", v, "k:", k)
+		newArr[v]++
+	}
+	fmt.Println(newArr)
+
+	ret := 0
+	isSum := true
+	for k, v := range newArr {
+
+		for v > 0 {
+			if isSum {
+				ret += k
+			}
+			isSum = !isSum //间隔相加
+			v--
+		}
+	}
+
+	return ret
+}
 
 ~~~
+
 
