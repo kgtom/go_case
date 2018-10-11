@@ -45,3 +45,36 @@ matrix[i][j] 包含的整数在 [0, 99]范围内。
 
 [来源](https://leetcode-cn.com/problems/toeplitz-matrix/)
 ## 代码
+~~~go
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+
+	ret := isToeplitzMatrix([][]int{[]int{1, 2}, []int{2, 1}})
+	fmt.Println("ret:", ret)
+
+}
+func isToeplitzMatrix(nums [][]int) bool {
+
+	l, col := len(nums), len(nums[0])
+	fmt.Println(l, col)
+	for i := 0; i+1 < l; i++ {
+
+		//主要临界点i+1 j+1的判断
+		for j := 0; j+1 < col; j++ {
+
+			if nums[i][j] != nums[i+1][j+1] {
+				//两者不同则认为false
+				return false
+			}
+
+		}
+	}
+	return true
+}
+
+~~~
