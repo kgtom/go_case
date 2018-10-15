@@ -22,7 +22,7 @@
 * 异步回调IO模型
  说一个熟悉的，比如nginx使用的就是epoll模型，通过事件驱动的方式与异步IO回调，使得服务器持续运转，来支撑高并发的请求
 
-  为了追求更高效和低开销的并发，golang的goroutine来了。
+ 为了追求更高效和低开销的并发，golang的goroutine来了。
 
 
 ## <span id="2">2.goroutine的简介</span>
