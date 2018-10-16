@@ -441,8 +441,72 @@ func main() {
 ~~~
 ### 2.退出作用
 
-### 3.判断channel是否已满(是否堵塞)
+~~~go
+package main
 
+import "fmt"
+
+func main() {
+
+	ch1 := make(chan int)
+	ch2 := make(chan int)
+	quit := make(chan int)
+
+	go func() {
+		for i := 0; i < 3; i++ {
+
+			ch2 <- i
+		}
+		quit <- 1
+	}()
+
+	go func() {
+		for i := 3; i < 5; i++ {
+			ch2 <- i
+		}
+		quit <- 1
+	}()
+
+	countGo := 0
+	for {
+		select {
+		case val := <-ch1:
+			fmt.Println(val)
+		case val := <-ch2:
+			fmt.Println(val)
+		case <-quit:
+			countGo++
+			if countGo == 2 {
+				fmt.Println("all goroutines 已结束，可以退出了")
+				return
+			}
+		}
+	}
+}
+
+~~~
+### 3.判断channel是否已满(是否堵塞)
+~~~go
+package main
+
+import "fmt"
+
+func main() {
+
+	ch := make(chan int, 1)
+	ch <- 10
+	for {
+		select {
+		case val, ok := <-ch:
+			fmt.Println("ch:", val, "ok:", ok)
+		default:
+			fmt.Println("ch 满了")
+			return
+
+		}
+	}
+}
+~~~
 
 
 ## <span id="8">8.总结</span>
