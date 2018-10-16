@@ -418,6 +418,27 @@ main.main()
 
 ### 1.超时作用
 
+~~~go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+
+	ch := make(chan int)
+	select {
+	case <-ch:
+	case <-time.After(time.Second):
+		fmt.Println("超时退出!")
+	}
+
+	fmt.Println("end")
+
+}
+~~~
 ### 2.退出作用
 
 ### 3.判断channel是否已满(是否堵塞)
