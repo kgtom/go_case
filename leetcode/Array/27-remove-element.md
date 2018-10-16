@@ -19,3 +19,36 @@
 
 ## 代码
 
+~~~go
+
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+
+	nums := []int{3, 2, 2, 3}
+	ret := removeElement(nums, 3)
+	fmt.Println(ret)
+}
+
+func removeElement(nums []int, val int) int {
+	currIdx := 0 //记录不同数的出现的个数
+	for i := 0; i < len(nums); i++ {
+
+		if nums[i] != val {
+			currIdx++
+			
+			nums[currIdx] = nums[i]
+			
+		}
+
+	}
+	
+	return currIdx
+
+}
+
+~~~
