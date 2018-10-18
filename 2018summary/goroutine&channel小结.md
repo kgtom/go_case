@@ -22,7 +22,7 @@
 * 异步回调IO模型
  说一个熟悉的，比如nginx使用的就是epoll模型，通过事件驱动的方式与异步IO回调，使得服务器持续运转，来支撑高并发的请求
 
- 为了追求更高效和低开销的并发，golang的goroutine来了。
+  为了追求更高效和低开销的并发，golang的goroutine来了。
 
 
 ## <span id="2">2.goroutine的简介</span>
@@ -438,6 +438,7 @@ func main() {
 	fmt.Println("end")
 
 }
+
 ~~~
 ### 2.退出作用
 
@@ -485,6 +486,7 @@ func main() {
 }
 
 ~~~
+
 ### 3.判断channel是否已满(是否堵塞)
 ~~~go
 package main
@@ -500,12 +502,13 @@ func main() {
 		case val, ok := <-ch:
 			fmt.Println("ch:", val, "ok:", ok)
 		default:
-			fmt.Println("ch 满了")
+            fmt.Println("ch 满了")
 			return
 
 		}
 	}
 }
+
 ~~~
 
 
@@ -515,5 +518,6 @@ func main() {
 * Select:可以处理多个channel。
 > reference:
 
-[csdn](https://blog.csdn.net/u011957758/article/details/81159481)
+* [csdn](https://blog.csdn.net/u011957758/article/details/81159481)
+* [github-kgtom](https://github.com/kgtom/go_case/blob/bcb0b8b8817943e709eb42e29814d9679b3a54ff/2017/Go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%B0%8F%E7%BB%93)
 
