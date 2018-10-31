@@ -29,7 +29,6 @@
 [来源](https://leetcode-cn.com/problems/find-peak-element/)
 
 ## 代码
-
 ~~~go
 package main
 
@@ -39,10 +38,12 @@ import (
 
 func main() {
 
-	arr := []int{1, 2, 3, 1}
-	ret := findPeakElement(arr)
+	arr := []int{1, 2, 1, 3, 5, 6, 4}
+	ret := findPeakElement3(arr)
 	fmt.Println("ret:", ret)
 }
+
+//常规方法，遍历比较 找到第一个峰值就return
 func findPeakElement(nums []int) int {
 
 	for i := 0; i < len(nums); i++ {
@@ -55,6 +56,63 @@ func findPeakElement(nums []int) int {
 		}
 	}
 	return -1
+}
+
+//二分法查找--迭代版本，只能查找到最后一个，不能找到第一个峰值。
+//二分查找要比较的是 target 元素，本题的 target 元素是 mid+1元素，即 nums[mid] 与 nums[mid+1] 的比较
+//mid>mid+1说明峰值在左边，反之峰值在右边
+func findPeakElement2(nums []int) int {
+	l := 0
+	r := len(nums) - 1
+	mid := (l + r) / 2
+
+	for l < r {
+		fmt.Println("mid:", mid, "l:", l, "r:", r)
+		if nums[mid] < nums[mid+1] {
+
+			l = mid + 1
+		} else {
+			r = mid
+		}
+		mid = (l + r) / 2
+	}
+
+	return l
+}
+
+//二分法查找--递归版本
+func findPeakElement3(nums []int) int {
+	return search(nums, 0, len(nums)-1)
+}
+
+func search(nums []int, l, r int) int {
+	mid := (l + r) / 2
+
+	for l < r {
+
+		//mid>mid+1则找到了
+		if nums[mid] > nums[mid+1] {
+			return search(nums, l, mid)
+		}
+		//mid<=mid+1
+		return search(nums, mid+1, r)
+
+	}
+	return l
+}
+
+//循环遍历一遍O(n), 只判断nums[i]>nums[i+1]就是第一个极值,如果没有则说明是递增序列，返回最后索引
+func findPeakElement4(nums []int) int {
+
+	for i := 0; i < len(nums)-1; i++ {
+		//
+		if nums[i] > nums[i+1] {
+			return i
+		} else {
+			//nums[i]<=nums[i+1] 说明前面都是一个递增序列，只要有一个 nums[i]>nums[i+1]的就是峰值
+		}
+	}
+	return len(nums) - 1
 }
 
 ~~~
