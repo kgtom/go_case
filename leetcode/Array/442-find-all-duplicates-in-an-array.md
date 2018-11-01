@@ -28,6 +28,8 @@ func main() {
 	ret := findDuplicates(arr)
 	fmt.Println("ret", ret)
 }
+
+//不用到任何额外空间并在O(n)时间复杂度内解决
 func findDuplicates(nums []int) []int {
 
 	mapKey := make(map[int]int)
@@ -46,6 +48,24 @@ func findDuplicates(nums []int) []int {
 	}
 	//fmt.Println("nums:", nums[:i])
 	return nums[:i]
+
+}
+
+//使用额外空间并在O(n)时间复杂度内解决
+func findDuplicates2(nums []int) []int {
+
+	mapKey := make(map[int]int)
+	dup := []int{}
+
+	for _, v := range nums {
+		mapKey[v]++
+
+		//过滤
+		if mapKey[v] > 1 {
+			dup = append(dup, v)
+		}
+	}
+	return dup
 
 }
 
