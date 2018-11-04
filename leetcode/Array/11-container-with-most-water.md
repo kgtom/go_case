@@ -34,7 +34,7 @@ func main() {
 	fmt.Println("ret:", ret)
 }
 
-//双指针方法 ，一次遍历，时间复杂度O(n) 空间复杂度O(1)使用恒定空间
+//1.双指针方法 ，一次遍历，时间复杂度O(n) 空间复杂度O(1)使用恒定空间
 func maxArea(height []int) int {
 
 	l, r := 0, len(height)-1
@@ -63,7 +63,7 @@ func maxArea(height []int) int {
 	return ret
 }
 
-//暴力方法 遍历 时间复杂度O(n2) 空间复杂度O(1)恒定
+//2.暴力方法 遍历 时间复杂度O(n2) 空间复杂度O(1)恒定
 
 func maxArea2(height []int) int {
 
@@ -84,7 +84,7 @@ func maxArea2(height []int) int {
 	return ret
 }
 
-//暴力方法 使用 math.Max
+//3.暴力方法 使用 math.Max
 func maxArea3(height []int) int {
 
 	var ret float64
