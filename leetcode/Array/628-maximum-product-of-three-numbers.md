@@ -16,4 +16,60 @@
 
 [来源](https://leetcode-cn.com/problems/maximum-product-of-three-numbers/)
 
-## 代码'
+## 代码
+
+
+~~~go
+package main
+
+import (
+	"fmt"
+	"math"
+)
+
+func main() {
+
+	arr := []int{1, 2, 3, 4}
+	ret := maximumProduct(arr)
+	fmt.Println("ret:", ret)
+}
+
+//时间复杂度为O(n)
+//最主要考虑正负数，要是全部为正数，则最大前三位，如果有负数，则比较后两个与最大正数积
+
+func maximumProduct(a []int) int {
+	//巧用最小值初始化最大值，存放最大值
+	max := []int{math.MinInt32, math.MinInt32, math.MinInt32}
+
+	//巧用最大值初始化存放最小值
+	min := []int{math.MaxInt32, math.MaxInt32}
+
+	for i := 0; i < len(a); i++ {
+		//比较，逐个迭代
+		if a[i] > max[2] {
+			max[0], max[1], max[2] = max[1], max[2], a[i]
+		} else if a[i] > max[1] {
+			max[0], max[1] = max[1], a[i]
+		} else if a[i] > max[0] {
+			max[0] = a[i]
+		}
+		//查找最小的
+		if a[i] < min[1] {
+			min[0], min[1] = min[1], a[i]
+		} else if a[i] < min[0] {
+			min[0] = a[i]
+		}
+	}
+
+	//三个正数最大值
+	ret := max[0] * max[1] * max[2]
+
+	//两个最小*一个最大正数(考虑负数的情况)
+	if ret < max[2]*min[0]*min[1] {
+		return max[2] * min[0] * min[1]
+	}
+
+	return ret
+}
+
+~~~
