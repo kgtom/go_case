@@ -1,21 +1,36 @@
+
 ## 题目
 
-给定一个大小为 n 的数组，找到其中的众数。众数是指在数组中出现次数大于 ⌊ n/2 ⌋ 的元素。
+数组的每个索引做为一个阶梯，第 i个阶梯对应着一个非负数的体力花费值 cost[i](索引从0开始)。
 
-你可以假设数组是非空的，并且给定的数组总是存在众数。
+每当你爬上一个阶梯你都要花费对应的体力花费值，然后你可以选择继续爬一个阶梯或者爬两个阶梯。
+
+您需要找到达到楼层顶部的最低花费。在开始时，你可以选择从索引为 0 或 1 的元素作为初始阶梯。
 
 示例 1:
-~~~
-输入: [3,2,3]
-输出: 3
 
-~~~
-示例 2:
-~~~
-输入: [2,2,1,1,1,2,2]
-输出: 2
-~~~
-[来源](https://leetcode-cn.com/problems/majority-element/)
+输入: cost = [10, 15, 20]
+输出: 15
+解释: 最低花费是从cost[1]开始，然后走两步即可到阶梯顶，一共花费15。
+ 示例 2:
+
+输入: cost = [1, 100, 1, 1, 1, 100, 1, 1, 100, 1]
+输出: 6
+解释: 最低花费方式是从cost[0]开始，逐个经过那些1，跳过cost[3]，一共花费6。
+注意：
+
+cost 的长度将会在 [2, 1000]。
+每一个 cost[i] 将会是一个Integer类型，范围为 [0, 999]。
+
+[来源](https://leetcode-cn.com/problems/min-cost-climbing-stairs/)
+
+**思路：**
+* 描述：
+有一个楼梯，每次可以走1层或者2层，cost数组表示每一层所需要花费的值。可以从第一层或者第二层开始。
+* 问题：
+求到达顶端所花费大的最小的值。
+
+
 ## 代码
 
 ~~~go
@@ -27,49 +42,34 @@ import (
 
 func main() {
 
-	ret := majorityElement2([]int{3, 5, 3})
+	arr := []int{10, 15, 20}
+	ret := minCostClimbingStairs(arr)
 	fmt.Println("ret:", ret)
-
-}
-func majorityElement(nums []int) int {
-	//巧用map,使用数组元素做map的key,然后⌊ n/2 ⌋与比较
-	m := make(map[int]int)
-	fmt.Println(len(nums), len(nums)/2)
-	for _, v := range nums {
-		m[v]++
-		//出现次数大于 ⌊ n/2 ⌋ 的元素
-		if m[v] > len(nums)/2 {
-			return v
-		}
-	}
-	fmt.Println(m)
-	return 0
 }
 
-func majorityElement2(nums []int) int {
+//属于动态规划问题,空间复杂度为O(n)，时间复杂度为O(n)
+//[]dp 存放到达每一层需要的花费值
+//cost 每一层的花费值
+func minCostClimbingStairs(cost []int) int {
 
-	//从默认第一个开始，遇到相同的count++，遇到不同的count--，如果count==0，则另一换一个defaultVal
-	defaultVal, count := len(nums), 1
-	for _, v := range nums {
-		//if defaultVal == v {
-		//	count++
-		//} else if count > 0 {
-		//	count--
-		//} else {
-		//	defaultVal = v
-		//}
-		//ps 也可以使用switch-case替换if-else if -else
+	n := len(cost)
+	dp := make([]int, n+1) //楼顶层数
 
-		switch {
-		case defaultVal == v:
-			count++
-		case count > 0:
-			count--
-		default:
-			defaultVal = v
-		}
+	//从0或者从1开始，所以可以得到dp[0]为0，dp[1]为0 都可以为初始值。
+	//从2开始，dp[i]可以由dp[i-2]走2层或者dp[i-1]走1层，比较两者大小，选小者，其它类推
+	for i := 2; i <= n; i++ {
+		dp[i] = min(dp[i-1]+cost[i-1], dp[i-2]+cost[i-2])
 	}
-	return defaultVal
+	//最后dp[i]就是达到顶层，最优规划所花费的最小值
+	fmt.Println(dp)
+	return dp[n]
+
+}
+func min(a, b int) int {
+	if a > b {
+		return b
+	}
+	return a
 }
 
 ~~~
