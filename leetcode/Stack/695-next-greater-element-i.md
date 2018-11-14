@@ -26,3 +26,59 @@ nums1和nums2 的数组大小都不超过1000。
 
 [来源](https://leetcode-cn.com/problems/next-greater-element-i/)
 ## 代码
+~~~go
+package main
+
+import "fmt"
+
+func main() {
+
+	nums1 := []int{4, 1, 2}
+	nums2 := []int{1, 3, 4, 2}
+
+	ret := nextGreaterElement2(nums1, nums2)
+	fmt.Println("ret:", ret)
+}
+
+//空间复杂度O(n^2) 双循环，空间复杂度O(1)
+func nextGreaterElement(findNums []int, nums []int) []int {
+
+	ret := []int{} // 或者 make([]int,len(findNums))
+	for i := 0; i < len(findNums); i++ {
+
+		for j := 0; j < len(nums); j++ {
+			if findNums[i] == nums[j] {
+				if j+1 <= len(nums)-1 && nums[j+1] > findNums[i] {
+
+					ret = append(ret, nums[j+1])
+				} else {
+					ret = append(ret, -1)
+				}
+			}
+		}
+	}
+	return ret
+}
+
+//巧用map，时间复杂度O(n) 一个循环就可以
+func nextGreaterElement2(findNums []int, nums []int) []int {
+
+	ret := []int{}
+	m := make(map[int]int)
+
+	for k, v := range nums {
+		m[v] = k
+	}
+	for _, v1 := range findNums {
+		fmt.Println("dd:", m[99])
+		j := m[v1] + 1
+		if j < len(nums) && v1 < nums[j] {
+			ret = append(ret, nums[j])
+		} else {
+			ret = append(ret, -1)
+		}
+	}
+	return ret
+}
+
+~~~
