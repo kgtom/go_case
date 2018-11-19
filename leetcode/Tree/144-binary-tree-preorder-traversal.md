@@ -109,7 +109,7 @@ func preorderTraversal(tree *TreeNode) []int {
 
 		//如果当前节点存在右节点，则入栈
 		//如果当前节点存在左节点，则入栈
-		//先给right节点，后给left,是因为栈的特性：先进后出，又因为前序遍历，需要先让左节点出来，后右节点出来。
+		//先 push right节点，后 push left,是因为栈的特性：先进后出，又因为前序遍历，需要先让左节点出来，后右节点出来。
 		if curr.Right != nil {
 			s.Push(curr.Right)
 		}
