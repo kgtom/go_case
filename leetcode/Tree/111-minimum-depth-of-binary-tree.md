@@ -46,6 +46,7 @@ func main() {
 }
 
 //递归版：DFS 深度优先搜索
+//时间复杂度 O(n)，空间复杂度：如果树是平衡的则O(logn),如果树是不平衡的，极端情况下单支树，则O(n)
 func minDepth(root *TreeNode) int {
 	if root == nil {
 		return 0
@@ -72,14 +73,35 @@ func min(a int, b int) int {
 	return b
 }
 
-//非递归版：BFS广度优先算法(一旦找到叶子节点，那么该叶子节点肯定离根节点最近，比DFS优势：不用遍历整颗树)
+//非递归版：迭代版，BFS广度优先算法(一旦找到叶子节点，那么该叶子节点肯定离根节点最近，比DFS优势：不用遍历整颗树)
+//时间复杂度 O(n)，空间复杂度 O(n)
+//类似于层序算法，逐层遍历，优势在于不用遍历整颗树。
 func minDepth2(root *TreeNode) int {
+
 	if root == nil {
 		return 0
 	}
-  //todo
+	var depth = 1
+	curr_arr := []*TreeNode{root}
 
-	return 0
+	for len(curr_arr) > 0 {
+
+		for _, item := range curr_arr {
+			if item.Left == nil && item.Right == nil {
+				return depth
+			}
+
+			if item.Left != nil {
+				curr_arr = append(curr_arr, item.Left)
+			}
+			if item.Right != nil {
+				curr_arr = append(curr_arr, item.Right)
+			}
+		}
+
+		depth++
+	}
+	return depth
 
 }
 func Int2TreeNode(nums []int) *TreeNode {
