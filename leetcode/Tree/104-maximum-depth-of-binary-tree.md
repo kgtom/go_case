@@ -20,7 +20,6 @@
 
 [来源](https://leetcode-cn.com/problems/maximum-depth-of-binary-tree/)
 ## 代码
-
 ~~~go
 package main
 
@@ -46,6 +45,7 @@ func main() {
 }
 
 //递归版：DFS 深度优先搜索
+//时间复杂度 O(n)，空间复杂度：如果树是平衡的则O(logn),如果树是不平衡的，极端情况下单支树，则O(n)
 func maxDepth(root *TreeNode) int {
 	if root == nil {
 		return 0
@@ -72,15 +72,55 @@ func max(a int, b int) int {
 	return a
 }
 
-//非递归版：BFS广度优先算法(一旦找到叶子节点，那么该叶子节点肯定离根节点最近，比DFS优势：不用遍历整颗树)
+
+//非递归版,迭代版 BFS:使用队列,将每一个存在左右节点的入列，然后不断迭代深入，直到最末端。
+//时间复杂度 O(n)，空间复杂度 O(n)
+
 func maxDepth2(root *TreeNode) int {
+
+	type QueueNode struct {
+		node  *TreeNode
+		depth int
+	}
 	if root == nil {
 		return 0
 	}
+	var maxDepth = 1
+	q := []QueueNode{{node: root, depth: 1}}
 
-	return 0
+	curr := q[0]
+	for {
+
+	loop:
+		if curr.depth > maxDepth {
+			maxDepth = curr.depth
+		}
+		if curr.node.Right != nil && curr.node.Left != nil {
+			q = append(q, QueueNode{node: curr.node.Right, depth: curr.depth + 1})
+			curr.node = curr.node.Left //改变当前链表的指向，注意：如何append 入列的是右节点，则将左节点置为当前节点。反之也可以。
+		} else if curr.node.Left != nil {
+			curr.node = curr.node.Left
+		} else if curr.node.Right != nil {
+			curr.node = curr.node.Right
+		} else {
+			if len(q) > 1 {
+				q = q[1:]
+				curr = q[0]
+				goto loop //更换待深入的节点，重新开始继续深入
+				fmt.Println("crr2:", curr.node.Val)
+			} else {
+				break
+			}
+		}
+
+		curr.depth++
+
+	}
+
+	return maxDepth
 
 }
+
 func Int2TreeNode(nums []int) *TreeNode {
 	n := len(nums)
 	if n == 0 {
