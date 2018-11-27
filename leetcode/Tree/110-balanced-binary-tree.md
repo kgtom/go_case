@@ -1,48 +1,44 @@
 ## 题目
 
+给定一个二叉树，判断其是否是一个有效的二叉搜索树。
 
-给定一个二叉树，判断它是否是高度平衡的二叉树。
+假设一个二叉搜索树具有如下特征：
 
-本题中，一棵高度平衡二叉树定义为：
-
-一个二叉树每个节点 的左右两个子树的高度差的绝对值不超过1。
-
+节点的左子树只包含小于当前节点的数。
+节点的右子树只包含大于当前节点的数。
+所有左子树和右子树自身必须也是二叉搜索树。
 ~~~
 示例 1:
 
-给定二叉树 [3,9,20,null,null,15,7]
-
-    3
+输入:
+    2
    / \
-  9  20
-    /  \
-   15   7
-返回 true 。
-
+  1   3
+输出: true
 示例 2:
 
-给定二叉树 [1,2,2,3,3,null,null,4,4]
-
-       1
-      / \
-     2   2
-    / \
-   3   3
-  / \
- 4   4
-返回 false 。
-
+输入:
+    5
+   / \
+  1   4
+     / \
+    3   6
+输出: false
+解释: 输入为: [5,1,4,null,null,3,6]。
+     根节点的值为 5 ，但是其右子节点值为 4 。
+     
 ~~~
 
-[来源](https://leetcode-cn.com/problems/balanced-binary-tree/)
-
+[来源](https://leetcode-cn.com/problems/validate-binary-search-tree/)
 
 ## 代码
+
 ~~~go
 package main
 
 import (
 	"fmt"
+	"math"
 )
 
 // TreeNode
@@ -54,27 +50,62 @@ type TreeNode struct {
 
 func main() {
 
-	arr := []int{3, 9, 20, 0, 0, 15, 76}
+	arr := []int{2, 1, 3}
 	node := Int2TreeNode(arr)
 
-	ret := isBalanced(node)
+	ret := isValidBST2(node)
 	fmt.Println("ret:", ret)
 
 }
 
-// 递归版：时间复杂度O(n)
-func isBalanced(root *TreeNode) bool {
-
-	if root == nil {
+// 递归版--网上大神的做法
+//对于某个节点n来说：
+//n的左子树的范围一定是(min,n.val)
+//n的右子树的范围一定是(n.val,max)
+//左右节点必满足： n.val>min &&n.val<max,否则return false
+func isValidBST(n *TreeNode) bool {
+	if n == nil || (n.Left == nil && n.Right == nil) {
 		return true
 	}
+	return isValidTree(n, math.MaxInt64, math.MinInt64)
+}
 
-	leftDepth, rightDepth := getDepth(root.Left), getDepth(root.Right)
-	//高度差的大于1，则不平衡
-	if leftDepth > rightDepth+1 || rightDepth > leftDepth+1 {
-		return false
+func isValidTree(n *TreeNode, max int, min int) bool {
+	if n == nil {
+		return true
+	}
+	if n.Val > min && n.Val < max {
+		return isValidTree(n.Left, n.Val, min) && isValidTree(n.Right, max, n.Val)
+	}
+	return false
+}
+
+// 递归版--中序遍历
+//根据二叉查找树的定义，将其中序遍历可得到递增序列，判断序列大小就可以验证是否是二叉查找树
+func isValidBST2(n *TreeNode) bool {
+
+	arr := inOrderTraversal(n)
+	for i := 0; i < len(arr)-1; i++ {
+		if arr[i] > arr[i+1] {
+			return false
+		}
 	}
 	return true
+}
+
+//中序遍历递归版
+func inOrderTraversal(root *TreeNode) []int {
+	var ret []int
+
+	if root == nil {
+		return ret
+	}
+
+	ret = append(ret, inOrderTraversal(root.Left)...)
+	ret = append(ret, root.Val)
+	ret = append(ret, inOrderTraversal(root.Right)...)
+
+	return ret
 }
 
 func Int2TreeNode(nums []int) *TreeNode {
@@ -112,33 +143,7 @@ func Int2TreeNode(nums []int) *TreeNode {
 	return root
 }
 
-func getDepth(root *TreeNode) int {
-	if root == nil {
-		return 0
-	}
-
-	var leftValue int
-	var rightValue int
-	//fmt.Println("root:", root.Val)
-	if root.Left != nil {
-
-		leftValue = getDepth(root.Left)
-	}
-	if root.Right != nil {
-		rightValue = getDepth(root.Right)
-	}
-
-	//返回当前分支树的最大深度，左右取大者。
-	return max(leftValue, rightValue) + 1
-
-}
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-
-}
-
-
 ~~~
+
+ 
+ps: [大神算法地址](https://leetcode.com/problems/validate-binary-search-tree/discuss/179030/Beats-100-Golang)
