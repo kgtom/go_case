@@ -1,5 +1,7 @@
 
-### 现在每秒至多执行三次，超过次数，则丢弃。
+## 介绍两种限速
+
+### 一、现在每秒至多执行三次，超过次数，则丢弃。
 
 ~~~go
 package main
@@ -72,7 +74,7 @@ func main() {
 }
 ~~~
 
-### 现在速率，每秒/3的速率执行。
+### 二、现在速率，每秒/3的速率执行。
 
 ~~~go
 
@@ -129,16 +131,16 @@ func (l *LimitRate) GetRate() int {
 
 func main() {
 	var wg sync.WaitGroup
-	var lr LimitRate
+	l := new(LimitRate)
 
 	//设置每秒/3的速率执行，如果请求太快，则限速，执行time.Sleep(速率)，类似于队列，排队执行。
-	lr.SetRate(3)
+	l.SetRate(3)
 
 	startTime := time.Now()
 	for i := 0; i < 10; i++ {
 		wg.Add(1)
 		go func() {
-			if lr.Limit() {
+			if l.Limit() {
 				fmt.Println("true")
 			} else {
 				fmt.Println("false")
@@ -149,5 +151,21 @@ func main() {
 	wg.Wait()
 	fmt.Println("总共时间：", time.Since(startTime))
 }
+
+~~~
+
+### 3.结合批量执行定时任务
+
+~~~go
+for _,v:=range userList {
+    
+    go func(){
+    //使用
+        lr.Limit()
+        user:=db.user.Update(v)
+        
+    }()
+}
+
 
 ~~~
