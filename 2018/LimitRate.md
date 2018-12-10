@@ -1,5 +1,6 @@
 
-## 介绍两种限速
+## 介绍两种限速及ratelimit
+
 
 ### 一、现在每秒至多执行三次，超过次数，则丢弃。
 
@@ -169,3 +170,6 @@ for _,v:=range userList {
 
 
 ~~~
+
+### 四、ratelimit使用
+[ratelimit](https://github.com/juju/ratelimit)
