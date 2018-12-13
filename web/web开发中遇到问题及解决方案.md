@@ -4,7 +4,8 @@
  * [三.性能分析--trace/pprof](#3)
  * [四.error处理](#4)
  * [五.何时选择并发](#5)
- * [六.todo](#6)
+ * [六.map线程不安全](#6)
+ * [七.组合由于继承](#7)
 
 
 ### <span id="1">一.接收消息队列中消息，并发处理与批处理</span>
@@ -529,7 +530,8 @@ Showing nodes accounting for 2086.86kB, 100% of 2086.86kB total
 
 ### <span id="4">四.error处理</span>
 
-* 实现 net.Error的interface。包装错误，判断错误类型，如果是因为网络原因导致的超时错误或者临时错误，可以发起增量重试
+* 实现 net.Error的interface。
+* 在分布式服务中，根据错误类型，如果是超时，则发起重试，如果是临时则做响应处理，再返回给下游。
 ~~~go
 package main
 
@@ -598,3 +600,11 @@ func process() (ret net.Error) {
 }
 
 ~~~
+
+### <span id="5">五.何时选择并发<span>
+    * IO密集型，例如 读写文件、db、redis 等连接。瓶颈在于IO的等待上，并发只提高CPU的利用效率，反而让很多goroutine处于堵塞状态(GWaiting)。
+    * cpu密集型，采用并发，提高cpu计算能力。
+
+### <span id="6">六.map线程不安全<span>
+    
+### <span id="7">七.组合由于继承<span>
