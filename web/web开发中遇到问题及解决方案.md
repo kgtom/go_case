@@ -167,7 +167,7 @@ func Handle() <-chan struct{} {
 * goroutine 如何被调度的？什么时候被堵塞？
 * 为什么有时候并发的程序反而不如串行执行快？
 
-#### 1.非web --"runtime/trace"
+###### 1.非web --"runtime/trace"
 
 ~~~go
 package main
@@ -221,7 +221,7 @@ $ go tool trace trace.out
 ~~~
 * 打开可视化界面，进行跟踪器查询、goroutine 跟踪及堆栈信息等。
 
-#### 2.web 跟踪 --"_net/http/pprof"
+###### 2.web 跟踪 --"_net/http/pprof"
 
 * 代码如下
 ~~~go
@@ -324,7 +324,7 @@ Transfer/sec:    273.45KB
 ~~~
 
 #### pporf --内存和cpu利用情况
- ##### 1.web应用程序:http://localhost:8081/test
+ ###### 1.web应用程序:http://localhost:8081/test
 
 ~~~go
 package main
@@ -465,7 +465,7 @@ $ find ./ -name "torch.svg"
 * 纵向y轴代表的是函数调用栈，横向x轴各个方块的宽度代表的是占用cpu时间的比例，越宽代表占用cpu时间越多，方块的颜色是随机的没有实际意义。
 
 
-##### 2.非web程序--runtime/pprof
+###### 2.非web程序--runtime/pprof
 
 * 以查看内存为例，生成heap.profile 文件。使用 go tool pprof 工具进行分析。
 ~~~
@@ -522,7 +522,7 @@ Showing nodes accounting for 2086.86kB, 100% of 2086.86kB total
 (pprof) 
 ~~~
 
-##### 总结
+###### 总结
 * pprof:侧重查看 cpu 及内存占用情况。
 * trace:侧重用于跟踪goroutine运行轨迹(延迟、堵塞、系统调用等)。
 
