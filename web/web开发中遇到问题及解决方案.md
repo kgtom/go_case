@@ -6,6 +6,7 @@
  * [五.何时选择并发](#5)
  * [六.map线程不安全](#6)
  * [七.组合优于继承](#7)
+ * [八.http request读取问题](#8)
 
 
 ### <span id="1">一.接收消息队列中消息，并发处理与批处理</span>
@@ -608,3 +609,27 @@ func process() (ret net.Error) {
 ### <span id="6">六.map线程不安全<span>
     
 ### <span id="7">七.组合优于继承<span>
+
+   
+### <span id="8">八、http request读取问题</span>
+
+场景在中间件先将用户的请求记录一下，然后再继续走自己的路由请求，
+第一个读取ioutil.ReadAll(req.Body)后，路由中就获取不到req.Body。于是需要再多一份拷贝使用 rdr1。
+~~~go
+
+		req := c.Request
+		if req.ContentLength > 0 {
+			buf, _ := ioutil.ReadAll(req.Body)
+			rdr1 := ioutil.NopCloser(bytes.NewBuffer(buf))
+
+			req.Body = ioutil.NopCloser(bytes.NewBuffer(buf))
+
+			_, err := w.RequestBody.ReadFrom(rdr1)
+			if err != nil {
+				raven.Warningf("读取Request.Body失败！")
+			}
+		}
+
+		c.Next()
+
+~~~
