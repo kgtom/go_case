@@ -1,13 +1,17 @@
 ## 本节知识
 * [一、consul功能介绍](#1)
 * [二、服务注册](#2)
+     * [1.json配置文件方式](#21)
+     * [2.http api方式](#22)
 * [三、服务发现](#3)
+     * [1.命令行](#31)
+     * [2.代码](#32)
 * [四、kv使用](#4)
 
 ### <span id="1">一、consul功能介绍</span>
 一、概述
 
-consul 是google开源的一个使用go语言开发的服务发现、配置管理中心服务。
+consul是google开源的一个使用go语言开发的服务发现、配置管理中心服务。
 包括服务注册与发现框架、分布一致性协议实现、健康检查、Key/Value存储、多数据中心方案。
 每个节点都需要运行agent，他有两种运行模式server和client。每个数据中心官方建议需要3或5个server节点以保证数据安全，同时保证server-leader的选举能够正确的进行。
 
@@ -75,7 +79,7 @@ http://192.168.1.198:8500/ui
 
 ### <span id="2">二、服务注册</span>
 
-#### 第一种：配置文件服务注册
+#### <span id="21"> 第一种：配置文件服务注册</span>
 ~~~
 # tom @ tom-pc in / [19:15:32] C:1
 $ sudo mkdir consul.conf
@@ -161,7 +165,7 @@ $ consul agent -dev -config-dir=/consul.conf
 ~~~
 * 也可以访问 UI http://127.0.0.1:8500/ui/dc1/services 查看。
 
-#### 第二种 服务启动时自己注册到 consul.
+#### <span id="22">第二种 服务启动时自己注册到 consul</span>
 
 * web8083服务及自动注册到consul
 ~~~go
@@ -290,6 +294,8 @@ func getLocalIP() string {
 
 * 重启consul,8082和8083两个服务运行正常，同样也可以在 http://127.0.0.1:8500/ui/dc1/services 查看。
 
+![consul](https://github.com/kgtom/back-end/blob/master/pic/consul.png)
+
 ~~~
 # tom @ tom-pc in ~ [23:01:27]
 $ consul agent -dev -config-dir=/consul.conf
@@ -299,7 +305,7 @@ $ consul agent -dev -config-dir=/consul.conf
 
 ### <span id="3">三、服务发现</span>
 
-#### 第一种通过命令
+#### <span id="31">第一种通过命令</span>
 * web.service.consul：通过json配置文件注册服务，其中web:是json配置中的服务名称
 ~~~
 
@@ -367,8 +373,59 @@ tom-pc.node.dc1.consul.	0	IN	TXT	"consul-network-segment="
 
 ~~~
 
-#### 第二种 通过代码
-//todo
+####  <span id="32">第二种 通过代码</span>
+~~~
+package main
+
+import (
+	"fmt"
+	"net"
+	"strconv"
+
+	"bufio"
+
+	"github.com/hashicorp/consul/api"
+)
+
+func main() {
+
+	//非默认情况下 需要设置实际的参数，例如Address
+	//config := api.DefaultConfig()
+	////config.Address = ""
+	//client, err := api.NewClient(config)
+	//if err != nil {
+	//	fmt.Println("client err:", err)
+	//}
+	//默认情况下
+	client, err := api.NewClient(api.DefaultConfig())
+	if err != nil {
+		fmt.Println("client err:", err)
+	}
+	services, err := client.Agent().Services()
+
+	addrs := map[string]string{}
+	for _, service := range services {
+		addrs[net.JoinHostPort(service.Address, strconv.Itoa(service.Port))] = service.ID
+		conn, err := net.Dial("tcp", fmt.Sprintf("%s:%d", service.Address, service.Port))
+		if err != nil {
+			fmt.Println("conn err:", err)
+		}
+		fmt.Println("remoteAddr conn:", conn.RemoteAddr())
+		//test
+		fmt.Fprintf(conn, "GET / HTTP/1.0\r\n\r\n")
+		status, err := bufio.NewReader(conn).ReadString('\n')
+		fmt.Println("get status：", status)
+	}
+	fmt.Println("------")
+	for k, v := range addrs {
+		fmt.Println("addr:", k, "id:", v)
+	}
+	//output:
+	//addr: 127.0.0.1:8082 id: web
+	//addr: 127.0.0.1:8083 id: web2
+
+}
+~~~
 
 
 ###  <span id="4">kv使用</span>
@@ -408,11 +465,11 @@ func main() {
 
 #### 第二种 命令行方式
 ~~~
-# tom @ tom-pc in ~ [15:45:19] C:7
+# tom @ tom-pc in ~ [21:45:19] 
 $ curl -X PUT -d "bar" http://localhost:8500/v1/kv/foo
 true
 
-# tom @ tom-pc in ~ [15:45:25]
+# tom @ tom-pc in ~ [21:45:25]
 $ curl http://localhost:8500/v1/kv/foo
 [
     {
