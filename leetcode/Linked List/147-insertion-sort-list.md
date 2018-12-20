@@ -79,10 +79,14 @@ func insertionSortList(head *ListNode) *ListNode {
 			pre = pre.Next
 
 		}
-		//迭代当前链表
+		//拿出当前curr.next
 		next := curr.Next
+		//因为 pre.next.val>curr.val,所以 pre.next 应该在curr之后，即：curr.next=pre.Next
 		curr.Next = pre.Next
+
+		//将小的 curr，替换之前pre.next，原因同上
 		pre.Next = curr
+		//继续迭代下一个
 		curr = next
 	}
 	return ret.Next
