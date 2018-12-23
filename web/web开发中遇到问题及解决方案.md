@@ -668,3 +668,11 @@ func main() {
 ~~~
 
 ### <span id="9">九.内存逃逸</span>
+
+内存逃逸：原本在栈上分配内存的对象，逃逸到了堆上进行分配，给gc增加负担。场景如下：
+* 指针传值
+* slice append操作
+* interface 类型参数
+~~~
+go build/run -gcflags '-m -l' main.go
+~~~
