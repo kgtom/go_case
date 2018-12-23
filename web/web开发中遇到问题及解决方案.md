@@ -7,6 +7,7 @@
  * [六.map线程不安全](#6)
  * [七.组合优于继承](#7)
  * [八.http request读取问题](#8)
+ * [九.内存逃逸](#9)
 
 
 ### <span id="1">一.接收消息队列中消息，并发处理与批处理</span>
@@ -610,6 +611,38 @@ func process() (ret net.Error) {
     
 ### <span id="7">七.组合优于继承<span>
 
+~~~go
+package main
+
+import "fmt"
+
+type OrderBase struct {
+}
+
+func (order *OrderBase) Create(str string) {
+
+	fmt.Println("order:", str)
+
+}
+
+type IndividualOrder struct {
+	OrderBase
+}
+
+func (i *IndividualOrder) Create(str string) {
+
+	fmt.Println("i:", str)
+}
+
+func main() {
+
+	individ := &IndividualOrder{}
+	individ.Create(" individ")
+	individ.OrderBase.Create("base individ")
+}
+
+
+~~~
    
 ### <span id="8">八、http request读取问题</span>
 
@@ -633,3 +666,5 @@ func process() (ret net.Error) {
 		c.Next()
 
 ~~~
+
+### <span id="9">九.内存逃逸</span>
