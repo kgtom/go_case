@@ -28,7 +28,7 @@ import "fmt"
 
 func main() {
 	arr := []int{-1, 0, 3, 5, 9, 12}
-	ret := search(arr, 9)
+	ret := search(arr, 9) //search2
 	fmt.Println("ret:", ret)
 
 }
@@ -37,21 +37,42 @@ func main() {
 func search(nums []int, target int) int {
 
 	low := 0
-	hight := len(nums) - 1
-	for low < hight {
+	high := len(nums) - 1
+	for low < high {
 
-		mid := (low + hight) / 2
+		mid := (low + high) / 2
 		if target == nums[mid] {
 			return mid
 		} else if target > nums[mid] {
 			low = mid + 1
 		} else {
-			hight = mid - 1
+			high = mid - 1
 		}
 	}
 
 	return -1
 }
 
+
+//递归版
+func search2(nums []int, target int) int {
+
+	return innerSearch(nums, target, 0, len(nums)-1)
+
+}
+func innerSearch(nums []int, target, low, high int) int {
+	mid := (low + high) / 2
+	for low <= high {
+
+		if nums[mid] == target {
+			return mid
+		} else if nums[mid] > target {
+			return innerSearch(nums, target, low, mid-1)
+		} else {
+			return innerSearch(nums, target, mid+1, high)
+		}
+	}
+	return -1
+}
 
 ~~~
