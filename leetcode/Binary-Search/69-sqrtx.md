@@ -20,3 +20,36 @@
  ~~~
      
 ## 代码
+~~~go
+package main
+
+import "fmt"
+
+func main() {
+	ret := mySqrt(8)
+	fmt.Println("ret:", ret)
+
+}
+
+//二分查找思路，迭代区间值的判断
+func mySqrt(x int) int {
+	if x <= 1 {
+		return x
+	}
+	low := 1
+	high := x
+
+	for low < high {
+		mid := (low + high) / 2
+		//区间的判断，小于等于且不大于+1的值
+		if mid*mid <= x && x < (mid+1)*(mid+1) {
+			return mid
+		} else if mid*mid < x {
+			low = mid
+		} else {
+			high = mid
+		}
+	}
+	return low
+}
+~~~
