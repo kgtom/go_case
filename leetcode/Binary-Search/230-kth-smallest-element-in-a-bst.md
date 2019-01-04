@@ -34,8 +34,6 @@
 
 
 ## 代码
-
-~~~go
 package main
 
 import "fmt"
@@ -48,19 +46,53 @@ type TreeNode struct {
 
 func main() {
 	tree := &TreeNode{
-		Val:   1,
-		Left:  nil,
-		Right: nil,
+		Val: 3,
+		Left: &TreeNode{
+			Val: 1,
+			Right: &TreeNode{
+				Val: 2,
+			},
+		},
+		Right: &TreeNode{
+			Val: 4,
+		},
 	}
 	ret := kthSmallest(tree, 1)
 	fmt.Println("ret:", ret)
 
 }
 
-//首先理解二叉搜索树特性，左边小于右边值，然后使用二分查找，定位最小值在左还是右进行查找
+//首先理解二叉搜索树特性，左边小于右边值，然后使用二分查找，定位最小值在左还是右进行查找,定位关键在于k 与左边节点个数比较
 func kthSmallest(root *TreeNode, k int) int {
 
+	//获取左边最小节点个数
+	minCount := getTreeCount(root.Left)
+	//说明是根节点
+	if minCount+1 == k {
+		return root.Val
+	} else if minCount < k {
+		//右边查找
+		return kthSmallest(root.Right, k-minCount-1)
+	} else {
+		//左边查找
+		return kthSmallest(root.Left, k)
+	}
 	return k
 }
+
+//递归获得节点个数
+func getTreeCount(root *TreeNode) int {
+
+	if root == nil {
+		return 0
+	} else if root.Left == nil && root.Right == nil {
+		return 1
+	} else {
+		left := getTreeCount(root.Left)
+		right := getTreeCount(root.Right)
+		return 1 + left + right
+	}
+}
+
 
 ~~~
