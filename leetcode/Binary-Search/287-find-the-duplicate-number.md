@@ -22,5 +22,43 @@
 数组中只有一个重复的数字，但它可能不止重复出现一次。
 ## 代码
 ~~~
+package main
 
+import "fmt"
+
+func main() {
+	nums := []int{3, 1, 3, 4, 2}
+	ret := findDuplicate(nums)
+	fmt.Println("ret:", ret)
+
+}
+
+//利用二分法,time:O(nlogn)，与10个苹果9个抽屉放置，找到一个抽屉放2个苹果，思路一样。折半找。
+// 如果小于等于mid的数的个数cnt> mid，那么重复的数字一定出现在[l，mid]之间，反之在[mid,higt]中。
+func findDuplicate(nums []int) int {
+	low, high := 0, len(nums)-1
+
+	for low < high {
+		mid := (high + low) / 2
+		cnt := 0 //记录个数
+		for i := 0; i < len(nums)-1; i++ {
+
+			if nums[i] <= mid {
+				cnt++
+			}
+
+		}
+		//说明在前半部分
+		if cnt > mid {
+			high = mid - 1
+		} else if cnt == mid {
+			return mid
+		} else {
+			//说明在后半部分
+			low = mid + 1
+		}
+	}
+
+	return low
+}
 ~~~
