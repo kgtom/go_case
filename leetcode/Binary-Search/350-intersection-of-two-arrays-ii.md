@@ -52,4 +52,35 @@ func intersect(nums1 []int, nums2 []int) []int {
 	}
 	return ret
 }
+
+/二分法:前提是 两个数组已排序的。
+func intersect2(nums1 []int, nums2 []int) []int {
+
+	ret := []int{}
+	for _, v := range nums1 {
+		idx := binarySearch(nums2, v)
+		if idx >= 0 && idx <= len(nums2) && nums2[idx] == v {
+
+			ret = append(ret, v)
+			nums2 = nums2[idx+1:]
+		}
+	}
+	return ret
+}
+func binarySearch(nums []int, val int) int {
+
+	low, high := 0, len(nums)-1
+	for low < high {
+		mid := (low + high) / 2
+		if nums[mid] == val {
+			return mid
+		} else if nums[mid] > val {
+			high = mid
+		} else {
+			low = mid + 1
+		}
+
+	}
+	return high
+}
 ~~~
