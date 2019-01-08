@@ -15,5 +15,10 @@
 输出: 2
 ~~~
 
+[来源](https://leetcode-cn.com/problems/majority-element/)
 ## 代码
+
+* 利用分治思路，将大问题化解成小问题解决。例如 归并排序。
+
+
 
