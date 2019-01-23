@@ -676,3 +676,67 @@ func main() {
 ~~~
 go build/run -gcflags '-m -l' main.go
 ~~~
+
+
+### <span id="10">十.高并发下使用redis解决分布式锁问题</span>
+~~~go
+package main
+
+import (
+	"fmt"
+	"sync"
+	"time"
+
+	"github.com/go-redis/redis"
+)
+
+//场景一、高并发下，缓存失效或者缓存穿透，大量请求直接到db,造成雪崩。
+//场景二、高并发下，抢单业务场景，保证只有一个获取锁，然后去执行自己的业务代码。
+//通过 SetNX  获取锁，如果成功了，那么更新缓存，然后删除锁。
+
+func handle() {
+
+	client := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
+
+	var lockKey = "op_lock"
+
+
+	// 获取 lock
+	res := client.SetNX(lockKey, 1, time.Second*5)
+	ok, err := res.Result()
+
+	if err != nil || !ok {
+		fmt.Println( "lock failed: ", err)
+		return
+	}
+
+	//处理自己的业务:高并发场景下的业务 1.更新缓存 2.访问某个api等等
+
+	fmt.Println("do something")
+
+	//删除 lock
+	delRes := client.Del(lockKey)
+	affected, err := delRes.Result()
+	if err != nil ||affected == 0 {
+		fmt.Println("unlock failed", err)
+		return
+	}
+	fmt.Println("unlock success")
+}
+
+func main() {
+	var wg sync.WaitGroup
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			handle()
+		}()
+	}
+	wg.Wait()
+}
+~~~
