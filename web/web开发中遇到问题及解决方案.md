@@ -8,7 +8,8 @@
  * [七.组合优于继承](#7)
  * [八.http request读取问题](#8)
  * [九.内存逃逸](#9)
- * [十.高并发下使用redis解决分布式锁问题](#10)
+ * [十.高并发下使用redis/etcdsync解决分布式锁问题](#10)
+
 
 ### <span id="1">一.接收消息队列中消息，并发处理与批处理</span>
 
@@ -610,8 +611,7 @@ func process() (ret net.Error) {
 ### <span id="6">六.map线程不安全<span>
     
 ### <span id="7">七.组合优于继承<span>
-
-~~~go
+    ~~~go
 package main
 
 import "fmt"
@@ -641,9 +641,7 @@ func main() {
 	individ.OrderBase.Create("base individ")
 }
 
-
-~~~
-   
+    ~~~
 ### <span id="8">八、http request读取问题</span>
 
 场景在中间件先将用户的请求记录一下，然后再继续走自己的路由请求，
@@ -668,7 +666,6 @@ func main() {
 ~~~
 
 ### <span id="9">九.内存逃逸</span>
-
 内存逃逸：原本在栈上分配内存的对象，逃逸到了堆上进行分配，给gc增加负担。场景如下：
 * 指针传值
 * slice append操作
@@ -676,7 +673,6 @@ func main() {
 ~~~
 go build/run -gcflags '-m -l' main.go
 ~~~
-
 
 ### <span id="10">十.高并发下使用redis解决分布式锁问题</span>
 ~~~go
@@ -738,5 +734,60 @@ func main() {
 		}()
 	}
 	wg.Wait()
+}
+~~~
+
+~~~
+package main
+
+import (
+	"github.com/zieckey/etcdsync"
+	"fmt"
+	"sync"
+)
+
+func main() {
+
+	var wg sync.WaitGroup
+	for i:=0;i<50;i++{
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			handle()
+		}()
+
+	}
+	wg.Wait()
+
+}
+
+//使用场景：
+// 1.单机情况下使用 metux互斥锁或者redis setNX
+// 2.分布式服务环境下，使用etcdsync 或者 github.com/samuel/go-zookeeper/zk，同一时间点，只允许有一个线程访问资源。例如：分布式Id生成器。
+//过程：1.new 一个key, 2.lock 3.unlock。
+func handle()  {
+	//记得要启动etcd
+	m, err := etcdsync.New("/lockKey", 5, []string{"http://127.0.0.1:2379"})
+	if m == nil || err != nil {
+		fmt.Println("etcdsync.new failed,err:",err)
+		return
+	}
+	//如果上锁成功，则其他线程被堵塞，直到unlock。
+	err = m.Lock()
+	if err != nil {
+		fmt.Println("etcdsync.Lock failed,err:",err)
+		return
+	}
+
+
+	//fmt.Println("etcdsync.Lock success")
+	fmt.Println("your code do something ")
+
+	err = m.Unlock()
+	if err != nil {
+		fmt.Println("etcdsync.Unlock failed")
+		return
+	}
+	//fmt.Println("etcdsync.Unlock success")
 }
 ~~~
