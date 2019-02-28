@@ -9,6 +9,7 @@
  * [八.http request读取问题](#8)
  * [九.内存逃逸](#9)
  * [十.高并发下使用redis/etcdsync解决分布式锁问题](#10)
+ * [十一.slice\变量操作加锁\defer recover()](#11)
 
 
 ### <span id="1">一.接收消息队列中消息，并发处理与批处理</span>
@@ -791,3 +792,8 @@ func handle()  {
 	//fmt.Println("etcdsync.Unlock success")
 }
 ~~~
+
+### <span id="11">十一.slice\变量操作加锁\defer recover()</span>
+* 使用slice是，尽量初始化时预设长度
+* 变量操作是非安全的，除chan外。
+* goroutine执行逻辑开始使用defer recover()，避免出现bug，影响全局。
