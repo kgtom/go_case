@@ -1,8 +1,8 @@
 
-### 背景
+### 一、背景
 两个定时任务(console-A、console-B 两个互为备份)同时处理订单状态，为了避免两个任务同时抢占同一笔订单，使用分布式锁，谁先处理orderID=1001的订单，则优先处理状态。
 
-### lock代码
+### 二、lock代码
 
 ~~~ go
 package lock
@@ -63,7 +63,7 @@ func (rl *RedisLock) Refresh() error {
 
 ~~~
 
-### 封装lock
+### 三、封装lock
 ~~~go
 //全局订单 行级锁
 func AcquireOrderLock(ctx context.Context, orderID string) (*lock.RedisLock, bool) {
@@ -77,7 +77,7 @@ func AcquireOrderLock(ctx context.Context, orderID string) (*lock.RedisLock, boo
 
 ~~~
 
-### 调用
+### 四、调用
 
 ~~~
 for _,v:=range orderList{
