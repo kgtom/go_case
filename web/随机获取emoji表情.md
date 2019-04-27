@@ -4,7 +4,7 @@
 
 ### 二、步骤
 1. emojiArr将 表情的Unicode(十六进制:1F3B5) 换成 十进制(127925)，组合在slice中。
-2. randIntArr()随机生成 表情slice中 113个表情的下标
+2. randIntArr()随机生成 表情slice中 8个表情的下标(即从113)
 3. 输出表情string,去掉最后空格
 4. 十六进制转换成十进制：https://tool.lu/hexconvert/
 
