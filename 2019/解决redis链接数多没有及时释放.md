@@ -1,4 +1,4 @@
-### 问题 高峰时提示：Error allocating resoures for the client，不能为客户端分配链接，于是查看了一下连接数
+### 问题 高峰时提示：Error allocating resoures for the client，不能为客户端分配链接
 
 * 1.info clients查看当前的redis连接数
 
