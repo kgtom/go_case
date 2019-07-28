@@ -2,7 +2,7 @@
 
 ## 一、理解概念
    
- ### 整个系统由生产者、Broker Server和消费者三部分组成，生产者和消费者由开发人员编写，通过API连接到Broker Server进行数据操作。
+ ** 整个系统由生产者、Broker Server和消费者三部分组成，生产者和消费者由开发人员编写，通过API连接到Broker Server进行数据操作。**
 
  * 1.Topic 是Kafka下消息的类别，这是逻辑上的概念，用来区分、隔离不同的消息数据，开发中只需要关注写入到哪个topic及从哪个topic消费即可。
 
@@ -22,7 +22,7 @@ consumer 的数量通常不超过partition的数量，且二者最好保持整�
 
 
 
-### 一个典型的消息队列 Kafka 集群包含：
+**  一个典型的消息队列 Kafka 集群包含：**
 * 		Producer：通过 push 模式向消息队列 Kafka Broker 发送消息，可以是网站的页面访问、服务器日志等，也可以是 CPU 和内存相关的系统资源信息；
 * 		Kafka Broker：消息队列 Kafka 的服务器，用于存储消息；支持水平扩展，一般 Broker 节点数量越多，集群吞吐率越高；
 * 		Consumer Group：通过 pull 模式从消息队列 Kafka Broker 订阅并消费消息;
