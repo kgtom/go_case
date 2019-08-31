@@ -21,3 +21,7 @@ type xxxService struct {
 func (f *xxxService) List(ctx context.Context, userID, offset, cnt uint32) ([]uint32, uint32, error) {
 }
 ~~~
+
+# 二、Daily Cache Record
+
+* 记录每天某种行为操作限制条数
