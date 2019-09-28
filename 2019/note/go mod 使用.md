@@ -6,3 +6,5 @@
 
 >reference
 * [colobu](https://colobu.com/2019/09/23/review-go-module-again/)
+* [mp](https://mp.weixin.qq.com/s/AsdCDodxZFxs2SkhSwOvpg)
+
