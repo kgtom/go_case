@@ -1,6 +1,6 @@
 
 
-### main goroutine 以及普通 goroutine 从执行到退出goexit0()的整个过程。
+### 一、main goroutine 以及普通 goroutine 从执行到退出goexit0()的整个过程。
 
 
 
@@ -20,9 +20,9 @@ goexit0() 主要完成最后的清理工作:
 
 而工作线程，又继续调用 schedule 函数进行新一轮的调度，整个过程形成了一个循环。
 
-### 我们继续探索非 main goroutine （后文我们就称 gp 好了）的退出流程。
+### 二、我们继续探索非 main goroutine 的退出流程。
 
-gp 执行完后，RET 指令弹出 goexit 函数地址（实际上是 funcPC(goexit)+1），CPU 跳转到 goexit 的第二条指令继续执行：
+gp 执行完后，RET 指令弹出 goexit 函数地址（实际上是 funcPC(goexit)+1），CPU 跳转到 goexit 的第二条指令继续执行，然后执行 goexit0函数
 
 
 ### 总结一下，main goroutine 和普通 goroutine 的退出过程：
@@ -37,4 +37,4 @@ gp 执行完后，RET 指令弹出 goexit 函数地址（实际上是 funcPC(goe
 
 
 > reference
-* (wx)[https://mp.weixin.qq.com/s/kwKqrT4BoeheM9MvSh-rLw]
+* [wx](https://mp.weixin.qq.com/s/kwKqrT4BoeheM9MvSh-rLw)
