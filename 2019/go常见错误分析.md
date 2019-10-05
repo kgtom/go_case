@@ -12,7 +12,8 @@
 
 
 ### 三、context
-
+* 利用context上下文解决元数据传递，超时传递，
+* 在启动新的goroutine时候，如何保证上下文传递到位。规避 Context Cancel这种问题。例如：开启go func(context.Background())的参数
 
 
 
