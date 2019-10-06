@@ -119,4 +119,4 @@ I hope this little blog post have given a simple example of goroutine-based work
 
 
 >reference
-* (callistaenterprise)[https://callistaenterprise.se/blogg/teknik/2019/10/05/go-worker-cancellation/]
+* [callistaenterprise](https://callistaenterprise.se/blogg/teknik/2019/10/05/go-worker-cancellation/)
