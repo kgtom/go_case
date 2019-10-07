@@ -1,5 +1,11 @@
 ### 一、interface
 
+ #### 1.nil 
+ 
+ #### 2.empty
+ 
+ #### 3.断言 
+
 
 ### 二、error
 
