@@ -13,7 +13,17 @@
 
 ### 三、context
 * 利用context上下文解决元数据传递，超时传递，
-* 在启动新的goroutine时候，如何保证上下文传递到位。规避 Context Cancel这种问题。例如：开启go func(context.Background())的参数
+* 在启动新的goroutine时候，既要保证上下文传递到位，又要规避 Context Cancel这种问题，我们需要写个func生成一个新的ctx，同时把原来ctx的key/value复制出来。或者直接使用context.Background()即可。
+
+~~~go
+func CopyCtx(ctx context) context.Context {
+    ret := context.Background() 
+    ret = context.WithValue(ret, ctxKey1, ctx.Value(ctxKey1)
+    ret = context.WithValue(ret, ctxKey2, ctx.Value(ctxKey2)  
+    return ret
+}
+
+~~~
 
 
 
