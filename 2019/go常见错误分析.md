@@ -1,6 +1,7 @@
 ### 一、interface
 
  #### 1.nil 
+ * value 和 type 都是 nil
  
  #### 2.empty
  
