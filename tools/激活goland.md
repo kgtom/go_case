@@ -1,5 +1,5 @@
 ### 永久激活goland:
-* 1.下载破解补丁并放在Goland安装文件目录下
+* 1.下载破解补丁并放在Goland安装文件目录下，[下载地址](https://github.com/kgtom/go_case/blob/master/tools/JetbrainsCrack-release-enc.jar)
 * 2.修改 goland.vmoptions文件，末尾追加：
 ~~~
 -javaagent:/Applications/GoLand.app/Contents/bin/JetbrainsCrack-release-enc.jar
