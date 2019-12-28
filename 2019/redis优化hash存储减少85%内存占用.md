@@ -3,10 +3,10 @@
  大约有200万左右用户选择分享图片，人均分享10张，大约2000万条记录。
  
  * 使用 redis string对象，key=md5(picID) value=userID，大约2.2G
-![2.2g](/content/images/2019/12/2.2g.png)
+![2.2g](https://github.com/kgtom/back-end/blob/master/pic/2.2g.png)
  
  * 更换redis hash对象存储,直接看图，节省了接近85%内存
-![315m](/content/images/2019/12/315m.png) 
+![315m](https://github.com/kgtom/back-end/blob/master/pic/315m.png) 
  
  ## 二、hash对象底层实现
   hash对象的编码分ziplist和hashTable，当存储 field-value数量不超512并且field 、value字符串长度都不超64字节，使用ziplist，反之使用hashTable。
