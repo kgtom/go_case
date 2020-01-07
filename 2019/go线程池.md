@@ -144,7 +144,7 @@ func (p *Pool) Close() {
 ~~~
 
 ### 调用代码
-~~~
+~~~go
 
 func doHandler(p ...interface{}) error {
 	fmt.Println("p:", p)
