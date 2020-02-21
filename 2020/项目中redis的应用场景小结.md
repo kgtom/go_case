@@ -14,6 +14,7 @@
 ### hash
 * 用户玩家信息、房间信息
 * 用户图片ID关联，尽量底层的Encoding使用ziplist，节约内存
+* 日活流量PV、UV统计：hset 、hlen,流量小的时候可用，简单高效，流量大的考虑zset或bitset位图
 
 ### list
 * 轻量级消息队列:push 、pop
@@ -28,6 +29,7 @@
 * 延迟队列：购买钻石，5分钟内未支付的，订单自动取消。score是时间戳，使用 Zrangebyscore 指定区间的member
 * 去重池:Zscore是否存在或者Zremrangebyrank缩减容量
 * 匹配池(推荐池)：Zrangebyscore 、zrem
+* 日活PV、UV统计：Zrangebyscore，流量小可用考虑使用hash，流量大考虑zset或bitset
 
 ## redis常用应用场景
 ### 分布式锁
@@ -44,3 +46,8 @@
   - 1.传统定时扫描db：缺点 db磁盘io是瓶颈问题
   - 2.kafka延迟队列：会有订阅-取消订阅--再次订阅，需要单独去重，逻辑复杂
   - 3.redis的zset做延迟队列：参考分表思路，根据user_id%10(比如10个zset队列,把提醒用户时间做score)，后台10台server获取队列。10台server保证均衡的方式获取队列的数据，简单采用redis中incr自增id%10得到获取第几个队列的编号。
+
+### 日活流量PV、UV统计
+* 流量小用：hash
+* 流量大用：zset、bitset，偏向bitset，二进制存储，占内存极少，1亿用户：1亿/1024/1024/8约为12M
+* 流量大，概率统计，使用HyperLogLog概率算法：pfadd、pfcount 存在0.81%误差
