@@ -93,7 +93,7 @@ Saved profile in /Users/tom/pprof/pprof.front.samples.cpu.001.pb.gz
 
 * 自动打开浏览器：localhost:8005/ui
 * 查看火焰图 ：http://localhost:8005/ui/flamegraph
-* 火焰图的x轴占用 CPU 使用的长短，y轴代表调用链，顶层正在执行的，下方都是它的父函数。观察业务函数在火焰图中的宽度，如果是占据较宽，说明可能存在性能问题。另外火焰图的配色没有含义，像火一样。
+* 火焰图的x轴占用CPU使用的长短，y轴代表调用链，顶层正在执行的，下方都是它的父函数。观察业务函数在火焰图中的长(宽)度，如果是占据较长(宽)，说明可能存在性能问题,也要留意顶层占较宽的(顶层多数是库函数)另外火焰图的配色没有含义，像火一样。
 
 
 ## <span id="2">三、排查内存使用情况</span>
@@ -117,8 +117,7 @@ Entering interactive mode (type "help" for commands, "o" for options)
 Showing nodes accounting for 18343.99kB, 100% of 18343.99kB total
 Showing top 10 nodes out of 68
       flat  flat%   sum%        cum   cum%
-14211.29kB 77.47% 77.47% 14211.29kB 77.47%  
-vendor/git.op.xxx.com/xxx-rd/rollingwriter.glob..func1
+14211.29kB 77.47% 77.47% 14211.29kB 77.47%  vendor/git.op.xxx.com/xxx-rd/rollingwriter.glob..func1
  1024.38kB  5.58% 83.06%  1024.38kB  5.58%  runtime.malg
   544.67kB  2.97% 86.02%   544.67kB  2.97%  vendor/google.golang.org/grpc/internal/transport.newBufWriter
      514kB  2.80% 88.83%      514kB  2.80%  bufio.NewWriterSize
