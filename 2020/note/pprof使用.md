@@ -93,8 +93,7 @@ Saved profile in /Users/tom/pprof/pprof.front.samples.cpu.001.pb.gz
 
 * 自动打开浏览器：localhost:8005/ui
 * 查看火焰图 ：http://localhost:8005/ui/flamegraph
-* 火焰图的x轴占用CPU使用的长短，y轴代表调用链，顶层正在执行的，下方都是它的父函数。观察业务函数在火焰图中的长(宽)度，如果是占据较长(宽)，说明可能存在性能问题,也要留意顶层占较宽的(顶层多数是库函数)另外火焰图的配色没有含义，像火一样。
-
+* 火焰图的x轴占用 CPU 使用的长短，y轴代表调用链，顶层正在执行的，下方都是它的父函数。观察业务函数在火焰图中的长(宽)度，如果是占据较长(宽)，说明可能存在性能问题,也要留意顶层占较宽的(顶层多数是库函数)另外火焰图的配色没有含义，像火一样。
 
 ## <span id="2">三、排查内存使用情况</span>
 
@@ -117,7 +116,8 @@ Entering interactive mode (type "help" for commands, "o" for options)
 Showing nodes accounting for 18343.99kB, 100% of 18343.99kB total
 Showing top 10 nodes out of 68
       flat  flat%   sum%        cum   cum%
-14211.29kB 77.47% 77.47% 14211.29kB 77.47%  vendor/git.op.xxx.com/xxx-rd/rollingwriter.glob..func1
+14211.29kB 77.47% 77.47% 14211.29kB 77.47%  
+vendor/git.op.xxx.com/xxx-rd/rollingwriter.glob..func1
  1024.38kB  5.58% 83.06%  1024.38kB  5.58%  runtime.malg
   544.67kB  2.97% 86.02%   544.67kB  2.97%  vendor/google.golang.org/grpc/internal/transport.newBufWriter
      514kB  2.80% 88.83%      514kB  2.80%  bufio.NewWriterSize
@@ -147,13 +147,48 @@ ROUTINE ======================== clients/kre/proto.(*InferImgAuditReq).String in
 
 
 ## <span id="4">五、排查goroutine协程泄露采样情况</span>
+* 查看goroutine的数量：打开http://10.1.1.10:8001/debug/pprof
+* 查看当前所有运行的 goroutines 堆栈跟踪,格式：go tool pprof http://10.1.1.10:8001/debug/pprof/goroutine
+* 使用 web、list 等查看
+
+~~~
+(base) tomdeMacBook-Pro :: ~ »  go tool pprof http://10.1.1.10:8001/debug/pprof/goroutine
+Fetching profile over HTTP from http://10.1.1.10:8001/debug/pprof/goroutine
+Saved profile in /Users/tom/pprof/pprof.front.goroutine.007.pb.gz
+File: front
+Type: goroutine
+Time: May 14, 2020 at 8:01pm (CST)
+Entering interactive mode (type "help" for commands, "o" for options)
+(pprof) top
+Showing nodes accounting for 44, 100% of 44 total
+Showing top 10 nodes out of 74
+      flat  flat%   sum%        cum   cum%
+        42 95.45% 95.45%         42 95.45%  runtime.gopark
+         1  2.27% 97.73%          1  2.27%  runtime.notetsleepg
+         1  2.27%   100%          1  2.27%  runtime/pprof.writeRuntimeProfile
+         0     0%   100%          7 15.91%  bufio.(*Reader).Read
+         0     0%   100%          1  2.27%  bytes.(*Buffer).ReadFrom
+         0     0%   100%          1  2.27%  common/proto.RegisterPontusHandlerFromEndpoint.func1.1
+         0     0%   100%          1  2.27%  common/server.Run
+         0     0%   100%          1  2.27%  crypto/tls.(*Conn).Read
+         0     0%   100%          1  2.27%  crypto/tls.(*Conn).readFromUntil
+         0     0%   100%          1  2.27%  crypto/tls.(*Conn).readRecord
+(pprof)
+
+~~~
+
 
 
 ## <span id="5">六、排查mutex锁争用的采样情况</span>
-
+~~~
+(base) tomdeMacBook-Pro :: ~ » go tool pprof http://10.1.1.10:8001/debug/pprof/mutex
+~~~
 
 ## <span id="6">七、排查blocks堵塞操作的采样情况</span>
+~~~
+go tool pprof http://10.1.1.10:8001/debug/pprof/block
 
+~~~
 ## <span id="7">八、trace的使用</span>
 
 ### 格式
@@ -162,7 +197,7 @@ ROUTINE ======================== clients/kre/proto.(*InferImgAuditReq).String in
 * 打开trace.out 文件，默认启动随机的http端口
 * 查看浏览器打开的页面
 ~~~
-(base) DESKTOP-HBQDAKA :: ~ » curl localhost:8001/debug/pprof/trace?seconds=10 > trace.out
+(base) DESKTOP-HBQDAKA :: ~ » curl http://10.1.1.10:8001/debug/pprof/trace?seconds=10 > trace.out
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
 100 24.9M    0 24.9M    0     0  2532k      0 --:--:--  0:00:10 --:--:-- 3069k
@@ -178,7 +213,7 @@ Desktop         Downloads       Movies          Pictures        Public          
 
 ~~~
 
-* 浏览器打开页面
+* 浏览器打开页面(ps chrome 80版本以下可以正常打开view trace)
 ~~~
 View trace
 Goroutine analysis
