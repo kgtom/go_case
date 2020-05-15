@@ -9,7 +9,11 @@
 * [八、trace的使用](#7)
 
 ## <span id="0">一、概括</span>
-常用命令：topN 、list 、web、pdf 等
+* 常用命令：topN 、list 、web、pdf 等
+* 使用goroutine很简单，重要合理管理G的生命周期，避免无法结束G,资源无法回收，造成内存泄露
+* 内存泄露：debug/pprof/heap可以查看内存分配情况、哪行代码占用多少内存及其代码位置，但不能直接说明有内存泄露，但如果一个代码位置占用内存持续增长，则基本可以确定存在内存泄露。查找内存问题：可以使用 两次 heap的diff
+* top命令，重点关注 RES占用物理内存大小，可以比较不同时间点的内存占用比
+* goroutine泄露：可以采用两次diff比较或者发现一段时间G数量只增不减，需要重点关注
 
 ## <span id="1">二、排查CPU占用情况</span>
 
@@ -96,51 +100,82 @@ Saved profile in /Users/tom/pprof/pprof.front.samples.cpu.001.pb.gz
 * 火焰图的x轴占用 CPU 使用的长短，y轴代表调用链，顶层正在执行的，下方都是它的父函数。观察业务函数在火焰图中的长(宽)度，如果是占据较长(宽)，说明可能存在性能问题,也要留意顶层占较宽的(顶层多数是库函数)另外火焰图的配色没有含义，像火一样。
 
 ## <span id="2">三、排查内存使用情况</span>
-
-* 使用命令topN 、list 、web查看
 ~~~
----1.采样远程服务，生产pb：(base) DESKTOP-HBQDAKA :: ~ » go tool pprof http://10.1.1.10:8001/debug/pprof/heap\?seconds\=60
----2.使用top 、list 、web 查看
----3.使用本地二进制文件，运行远程pb,生成火焰图：(base) DESKTOP-HBQDAKA :: ~ » go tool pprof -http=":8005" devspace/pontus/src/apps/front/front  /Users/tom/pprof/pprof.front.alloc_objects.alloc_space.inuse_objects.inuse_space.002.pb.gz
-
-(base) DESKTOP-HBQDAKA :: ~ » go tool pprof http://10.1.1.10:8001/debug/pprof/heap\?seconds\=60
-Fetching profile over HTTP from http://10.1.1.10:8001/debug/pprof/heap?seconds=60
+(base) tomdeMacBook-Pro :: ~ » go tool pprof http://10.1.1.10:8001/debug/pprof/heap
+Fetching profile over HTTP from http://10.1.1.10:8001/debug/pprof/heap
+Saved profile in /Users/tom/pprof/pprof.front.alloc_objects.alloc_space.inuse_objects.inuse_space.001.pb.gz
+File: front
+Type: inuse_space
+Time: May 15, 2020 at 6:03pm (CST)
+Entering interactive mode (type "help" for commands, "o" for options)
+(pprof) top
+Showing nodes accounting for 1044.70kB, 100% of 1044.70kB total
+      flat  flat%   sum%        cum   cum%
+  532.26kB 50.95% 50.95%   532.26kB 50.95%  vendor/github.com/gogo/protobuf/proto.RegisterType
+  512.44kB 49.05%   100%   512.44kB 49.05%  vendor/github.com/go-redis/redis/internal/pool.NewConnPool
+         0     0%   100%   512.44kB 49.05%  dao/lock.init.0
+         0     0%   100%  1044.70kB   100%  runtime.main
+         0     0%   100%   512.44kB 49.05%  vendor/github.com/go-redis/redis.NewClient
+         0     0%   100%   512.44kB 49.05%  vendor/github.com/go-redis/redis.newConnPool
+         0     0%   100%   532.26kB 50.95%  vendor/k8s.io/api/batch/v1beta1.init.0
+(pprof) web
+(pprof) exit
+(base) tomdeMacBook-Pro :: ~ » go tool pprof http://10.1.1.10:8001/debug/pprof/heap
+Fetching profile over HTTP from http://10.1.1.10:8001/debug/pprof/heap
 Saved profile in /Users/tom/pprof/pprof.front.alloc_objects.alloc_space.inuse_objects.inuse_space.002.pb.gz
 File: front
 Type: inuse_space
-Time: May 13, 2020 at 9:21pm (CST)
+Time: May 15, 2020 at 6:04pm (CST)
 Entering interactive mode (type "help" for commands, "o" for options)
-(pprof)
-(pprof)
 (pprof) top
-Showing nodes accounting for 18343.99kB, 100% of 18343.99kB total
-Showing top 10 nodes out of 68
+Showing nodes accounting for 6295.79kB, 100% of 6295.79kB total
+Showing top 10 nodes out of 36
       flat  flat%   sum%        cum   cum%
-14211.29kB 77.47% 77.47% 14211.29kB 77.47%  
-vendor/git.op.xxx.com/xxx-rd/rollingwriter.glob..func1
- 1024.38kB  5.58% 83.06%  1024.38kB  5.58%  runtime.malg
-  544.67kB  2.97% 86.02%   544.67kB  2.97%  vendor/google.golang.org/grpc/internal/transport.newBufWriter
-     514kB  2.80% 88.83%      514kB  2.80%  bufio.NewWriterSize
-  513.31kB  2.80% 91.62%   513.31kB  2.80%  vendor/golang.org/x/net/http2/hpack.(*headerFieldTable).addEntry
-  512.25kB  2.79% 94.42%   512.25kB  2.79%  vendor/github.com/golang/protobuf/proto.(*tagMap).put
-  512.05kB  2.79% 97.21%  1536.42kB  8.38%  runtime.systemstack
-  512.05kB  2.79%   100%   512.05kB  2.79%  vendor/google.golang.org/grpc/internal/transport.(*Stream).waitOnHeader
-         0     0%   100%   512.25kB  2.79%  clients/kre.(*cliImpl).InferImgAudit
-         0     0%   100%   512.25kB  2.79%  clients/kre/proto.(*InferImgAuditReq).String
-
-(pprof) list .InferImgAudit
-Total: 3.03MB
-ROUTINE ======================== clients/kre.(*cliImpl).InferImgAudit in /dworkspace/src/clients/kre/kre.go
-         0   512.25kB (flat, cum) 16.49% of Total
- Error: open /dworkspace/src/clients/kre/kre.go: no such file or directory
-ROUTINE ======================== clients/kre/proto.(*InferImgAuditReq).String in /dworkspace/src/clients/kre/proto/kre.pb.go
-         0   512.25kB (flat, cum) 16.49% of Total
- Error: open /dworkspace/src/clients/kre/proto/kre.pb.go: no such file or directory
+ 4737.09kB 75.24% 75.24%  4737.09kB 75.24%  vendor/xxx.op.xxx.com/xxx-rd/rollingwriter.glob..func1
+  532.26kB  8.45% 83.70%   532.26kB  8.45%  vendor/github.com/gogo/protobuf/proto.RegisterType
+     514kB  8.16% 91.86%      514kB  8.16%  bufio.NewReaderSize
+  512.44kB  8.14%   100%   512.44kB  8.14%  vendor/github.com/go-redis/redis/internal/pool.NewConnPool
+         0     0%   100%      514kB  8.16%  bufio.NewReader
+         0     0%   100%  1184.27kB 18.81%  clients/kre.(*cliImpl).InferImgAudit
+         0     0%   100%  1184.27kB 18.81%  clients/modelproxy.(*cliImpl).CommonClassify
+         0     0%   100%  1184.27kB 18.81%  clients/modelproxy.(*cliImpl).CommonClassify.func1
+         0     0%   100%  1184.27kB 18.81%  common/proto._Pontus_InvokeClassifyModel_Handler
+         0     0%   100%   512.44kB  8.14%  dao/lock.init.0
 (pprof) web
+(pprof) exit
+(base) tomdeMacBook-Pro :: ~ » go tool pprof -base /Users/tom/pprof/pprof.front.alloc_objects.alloc_space.inuse_objects.inuse_space.001.pb.gz /Users/tom/pprof/pprof.front.alloc_objects.alloc_space.inuse_objects.inuse_space.002.pb.gz
+File: front
+Type: inuse_space
+Time: May 15, 2020 at 6:03pm (CST)
+Entering interactive mode (type "help" for commands, "o" for options)
+(pprof) top
+Showing nodes accounting for 5251.10kB, 100% of 5251.10kB total
+Showing top 10 nodes out of 29
+      flat  flat%   sum%        cum   cum%
+ 4737.09kB 90.21% 90.21%  4737.09kB 90.21%  vendor/xxx.op.xxx.com/xxx-rd/rollingwriter.glob..func1
+     514kB  9.79%   100%      514kB  9.79%  bufio.NewReaderSize
+         0     0%   100%      514kB  9.79%  bufio.NewReader
+         0     0%   100%  1184.27kB 22.55%  clients/kre.(*cliImpl).InferImgAudit
+         0     0%   100%  1184.27kB 22.55%  clients/modelproxy.(*cliImpl).CommonClassify
+         0     0%   100%  1184.27kB 22.55%  clients/modelproxy.(*cliImpl).CommonClassify.func1
+         0     0%   100%  1184.27kB 22.55%  common/proto._Pontus_InvokeClassifyModel_Handler
+         0     0%   100%      514kB  9.79%  net/http.(*conn).serve
+         0     0%   100%      514kB  9.79%  net/http.newBufioReader
+         0     0%   100%  2368.55kB 45.11%  service/classifymodel.(*classifyModel).InvokeClassifyModel.func1
+(pprof) list .InvokeClassifyModel.func1
+Total: 5.13MB
+ROUTINE ======================== service/classifymodel.(*classifyModel).InvokeClassifyModel.func1 in /dworkspace/src/service/classifymodel/facade.go
+         0     2.31MB (flat, cum) 45.11% of Total
+ Error: open /dworkspace/src/service/classifymodel/facade.go: no such file or directory
+(pprof)
 (pprof) exit
 (base) DESKTOP-HBQDAKA :: ~ » go tool pprof -http=":8005" devspace/pontus/src/apps/front/front  /Users/tom/pprof/pprof.front.alloc_objects.alloc_space.inuse_objects.inuse_space.002.pb.gz
 
 ~~~
+
+另外：list+func ，可以查看本地代码，但查看不到远程代码，两种方式查看：
+* 1.没有浏览器的，使用wget http://10.1.1.10:8001/debug/pprof/heap?debug=1 ,下载下来，根据方法名称查询
+* 2.有浏览器的，直接查看 http://10.1.1.10:8001/debug/pprof/heap?debug=1 页面
 
 
 ## <span id="3">四、排查allocs频繁分配内存及回收GC情况</span>
@@ -150,7 +185,30 @@ ROUTINE ======================== clients/kre/proto.(*InferImgAuditReq).String in
 * 查看goroutine的数量：打开http://10.1.1.10:8001/debug/pprof
 * 查看当前所有运行的 goroutines 堆栈跟踪,格式：go tool pprof http://10.1.1.10:8001/debug/pprof/goroutine
 * 使用 web、list 等查看
+* 查看G总数量，及堵塞在某行代码的G的数量
 
+ http://10.1.1.10:8001/debug/pprof/goroutine?debug=1
+ ~~~
+ goroutine profile: total 45  
+6 @ 0x4316bf 0x441198 0x87c4ad 0x45eb91
+#	0x87c4ac	vendor/google.golang.org/grpc.(*ccBalancerWrapper).watcher+0x12c	/dworkspace/src/vendor/google.golang.org/grpc/balancer_conn_wrappers.go:115
+
+ ~~~
+ - 45 G的总数量
+ - 6个G 在代码115行堵塞
+ 
+* 查看G的详细信息，包括G的编号、G的状态、持续时间
+~~~
+goroutine 1 [chan receive, 229 minutes]:
+vendor/xxx.op.xxx.com/xxx-rd/doraemon/server.(*Server).Run(0xc000030000)
+	/dworkspace/src/vendor/xxx.op.xxx.com/xxx-rd/xxx/server/server.go:170 +0xbb
+common/server.Run(0x1f40)
+	/dworkspace/src/common/server/server.go:32 +0x9f
+main.main()
+	/dworkspace/src/apps/front/main.go:66 +0xc9
+~~~
+- 编号1的G 具体在代码main.go 66行，堵塞了229分钟了，因为这个是监听客户端，所以从上线后一直堵塞，如果不堵塞了，说明服务挂了。
+#### 格式
 ~~~
 (base) tomdeMacBook-Pro :: ~ »  go tool pprof http://10.1.1.10:8001/debug/pprof/goroutine
 Fetching profile over HTTP from http://10.1.1.10:8001/debug/pprof/goroutine
@@ -180,11 +238,13 @@ Showing top 10 nodes out of 74
 
 
 ## <span id="5">六、排查mutex锁争用的采样情况</span>
+* 获取导致 mutex 争用的 goroutine 堆栈，使用前需要先设置采样大小 runtime.SetMutexProfileFraction(1)
 ~~~
 (base) tomdeMacBook-Pro :: ~ » go tool pprof http://10.1.1.10:8001/debug/pprof/mutex
 ~~~
 
 ## <span id="6">七、排查blocks堵塞操作的采样情况</span>
+* 获取导致阻塞的 goroutine 堆栈(如 channel, mutex 等)，使用前需要先设置采样大小 runtime.SetBlockProfileRate(1)
 ~~~
 go tool pprof http://10.1.1.10:8001/debug/pprof/block
 
@@ -225,3 +285,6 @@ User-defined tasks
 User-defined regions
 Minimum mutator utilization
 ~~~
+
+
+
