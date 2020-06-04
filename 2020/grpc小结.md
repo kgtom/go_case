@@ -1,11 +1,12 @@
 ## 概括
 
  * 包括 grpc 重试、负载均衡(代理、客户端)、超时控制、健康检查
-
+### 重试(包括熔断降级)
+ TODO
 
 ### 负载均衡
 
-* 1. 客户端负载均衡： 优点：k8s api watch ep,低延迟， 缺点：客户端实现成本高
+* 1.客户端负载均衡： 优点：k8s api watch ep,低延迟， 缺点：客户端实现成本高
 
 ~~~
 //method one: k8s api ,watch ep(ps:headless srv or normal srv is ok,do not forget k8s cfg serviceAccount)
@@ -39,9 +40,12 @@ conn, err := grpc.Dial(
 ~~~
 
 
+### 超时控制
+TODO
 
 
 > reference
- *[grpc-retry](https://github.com/grpc/grpc-go/tree/master/examples/features/retry)
- *[nobugware-k8s](https://blog.nobugware.com/post/2019/kubernetes_mesh_network_load_balancing_grpc_services/
+ * [grpc-retry](https://github.com/grpc/grpc-go/tree/master/examples/features/retry)
+
+ * [nobugware-k8s](https://blog.nobugware.com/post/2019/kubernetes_mesh_network_load_balancing_grpc_services/
 )
