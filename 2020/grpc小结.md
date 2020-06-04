@@ -12,7 +12,7 @@
 //method one: k8s api ,watch ep(ps:headless srv or normal srv is ok,do not forget k8s cfg serviceAccount)
 kuberesolver.RegisterInCluster()
 conn, err := grpc.Dial(
-	"kubernetes:///kre.kir-system:8001",
+	"k8s-customer:///svcName.ns:8001",
 	grpc.WithInsecure(),
 	grpc.WithBalancerName(roundrobin.Name),
 )
@@ -33,9 +33,9 @@ conn, err := grpc.Dial(
 * 3.负载均衡代理，基于k8s svc(无头服务，headless,clusterIP: None)的dns,优点：简单，缺点：dns默认刷新30min，有点长，可调节时长
 
 ~~~
-//method three: k8s serviceName,find vip(clusterIP)
-//ctx, _ := context.WithTimeout(context.Background(), defaultDialTimeout*time.Millisecond)
-////conn, err := grpc.DialContext(ctx, "dns:///svrName.ns:8001", grpc.WithInsecure())
+method three: k8s serviceName,find vip(clusterIP)
+ctx, _ := context.WithTimeout(context.Background(), defaultDialTimeout*time.Millisecond)
+conn, err := grpc.DialContext(ctx, "dns:///svrName.ns:8001", grpc.WithInsecure())
 
 ~~~
 
