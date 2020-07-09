@@ -1,0 +1,51 @@
+https://github.com/grpc-ecosystem/grpc-gateway
+
+
+eg:
+
+(base) DESKTOP-HBQDAKA :: ~/projects/minio-cli ‹master*› » tree -L 2                                                                                                                     130 ↵
+.
+├── Makefile
+├── deploy
+│   ├── docker
+│   └── k8s
+├── go.mod
+├── go.sum
+├── main.go
+├── minio-cli
+├── miniopb
+│   ├── minio_service.pb.go
+│   ├── minio_service.pb.gw.go
+│   ├── minio_service.proto
+│   └── minio_service.swagger.json
+├── server
+│   └── grpc_gateway.go
+├── test
+│   ├── main.go
+│   └── proto
+└── vendor
+    ├── github.com
+    ├── golang.org
+    ├── google.golang.org
+    ├── gopkg.in
+    └── modules.txt
+    
+    
+//grpc
+//(base) DESKTOP-HBQDAKA :: projects/minio-cli/proto ‹master*› » protoc -I/Users/tom/go/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis  -I. --go_out=plugins=grpc:. *.proto
+
+
+//gw 注意在哪个路径下执行命令
+
+//生成新文件夹
+//(base) DESKTOP-HBQDAKA :: ~/projects/minio-cli ‹master*› » protoc -I/Users/tom/go/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis  -I. --grpc-gateway_out=logtostderr=true:miniopb  miniopb/minio_service.proto
+
+//在同一文件夹下
+//(base) DESKTOP-HBQDAKA :: projects/minio-cli/miniopb ‹master*› » protoc -I/Users/tom/go/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis  -I. --grpc-gateway_out=logtostderr=true:. minio_service.proto
+
+
+//swagger
+//(base) DESKTOP-HBQDAKA :: projects/minio-cli/miniopb ‹master*› » protoc -I/Users/tom/go/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis  -I. --swagger_out=logtostderr=true:. minio_service.proto
+
+//grpc 只有pb,没有因为第三方pkg
+//protoc  -I. --go_out=plugins=grpc:. *.proto
