@@ -1,0 +1,45 @@
+
+go mod 拉取私有仓库：
+
+
+
+拉取私有仓库：
+
+1.查看 当前ide goproxy,使用 direct,不使用 goproxy，因为代理访问不到私有仓库
+ echo $GOPROXY  
+direct
+
+
+2. 使用 go mod tidy ，拉取依赖包，发现拉取不到,因为 go mod 使用https 拉取，但公司git 不支持https，所以需要自己手动拉取
+(base) DESKTOP-HBQDAKA :: xxx.com/xxx-rd/xxx ‹master*› » echo $GOPROXY                                                                      
+direct
+(base) DESKTOP-HBQDAKA :: xxx.com/xxx-rd/xxx ‹master*› » go mod tidy
+go: xxx.com/xxx-rd/xxx/cron@v0.0.0-20200716021050-b5e622f065f6: unrecognized import path "xxx.com/xxx-rd/xxx/cron" (https fetch: Get xxx.com/xxx-rd/xxx/cron?go-get=1: dial tcp 11.11.xx.xx:443: connect: connection refused)
+
+3. 手动拉取
+
+~~~
+(base) DESKTOP-HBQDAKA :: xxx.com/xxx-rd/xxx ‹master*› » go get --insecure xxx.com/xxx-rd/xxx/cron@v0.0.0-20200716021050-b5e622f065f6                      1 ↵
+
+~~~
+
+ GOPROXY=direct
+ echo $GOPROXY
+
+
+
+4.拉取公网依赖：
+
+ GOPROXY=https://goproxy.io,direct
+go mod tidy 
+go mod download
+go mod vendor
+
+5.有时候 goland import 标注红色，需要重启一下goland
+
+
+6.添加新依赖包
+方法一： 修改 go.mod 文件，然后执行 go mod download 
+方法二： 使用 go get packagename@v0.0.0，或者 私有仓库 --insecure 会自动更新 go.mod 文件的 
+方法三： go run、go build 自动下载依赖
+
