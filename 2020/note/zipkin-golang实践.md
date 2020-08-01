@@ -31,7 +31,27 @@ import (
     "google.golang.org/grpc"
     zipkingrpc "github.com/openzipkin/zipkin-go/middleware/grpc"
 )
+ ~~~
+ tracer := GetTracer("demoService", "127.0.01")
  
+// create global zipkin http server middleware
+serverMiddleware := zipkinhttp.NewServerMiddleware(
+tracer, zipkinhttp.TagResponseSize(true),
+)
+ 
+// create global zipkin traced http client
+client, err := zipkinhttp.NewClient(tracer, zipkinhttp.ClientTrace(true))
+if err != nil {
+log.Fatalf("unable to create client: %+v\n", err)
+}
+ 
+// initialize router
+router := mux.NewRouter()
+ 
+// start web service with zipkin http server middleware
+ts := httptest.NewServer(serverMiddleware(router))
+defer ts.Close()
+ ~~~
  
 //默认span
 conn, err = grpc.Dial(addr, grpc.WithStatsHandler(zipkingrpc.NewClientHandler(tracer)))
