@@ -8,22 +8,39 @@ grpc:
 服务端：
 ~~~
 import (
-	"google.golang.org/grpc"
-	zipkingrpc "github.com/openzipkin/zipkin-go/middleware/grpc"
+    "google.golang.org/grpc"
+    zipkingrpc "github.com/openzipkin/zipkin-go/middleware/grpc"
 )
-
+ 
+ 
+tracer := GetTracer("demoService", "127.0.01")
+ 
+ //默认span
 server = grpc.NewServer(grpc.StatsHandler(zipkingrpc.NewServerHandler(tracer)))
+ 
+ 
+ // 自定义span :tracer can now be used to create spans.
+   span, ctx := zkTracer.StartSpanFromContext(ctx, "server ping")
+   // ... do some work ...
+   span.Finish()
 ~~~
 
 客户端：
 ~~~
 import (
-	"google.golang.org/grpc"
-	zipkingrpc "github.com/openzipkin/zipkin-go/middleware/grpc"
+    "google.golang.org/grpc"
+    zipkingrpc "github.com/openzipkin/zipkin-go/middleware/grpc"
 )
-
+ 
+ 
+//默认span
 conn, err = grpc.Dial(addr, grpc.WithStatsHandler(zipkingrpc.NewClientHandler(tracer)))
-
+//自定义span
+ 
+ctx := context.Background()
+span, ctx := zkTracer.StartSpanFromContext(ctx, "client ping")
+// ... do some work ...
+span.Finish()
 ~~~
 
 http：
