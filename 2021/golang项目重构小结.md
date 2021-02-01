@@ -4,7 +4,7 @@
 ### 负载均衡
 * nginx 、consul 、consul-template
 ### 限流、熔断降级、回滚、隔离
-* 限流：总并发qps、瞬时并发nginx limit_conn、令牌
+* 限流：总并发qps、瞬时并发nginx limit_conn、令牌桶(平均流入速率，并允许一定程度的突然性流量，最大速率取决于桶的容量和生产token的速率)、漏桶(固定的流量流出速率)
 * 熔断降级：超时降级、超时次数、故障降级
 * 回滚：代码库回滚、部署版本回滚、数据库回滚
 * 隔离：进程隔离、读写隔离、热点隔离、集群隔离、机房隔离、资源隔离
@@ -25,6 +25,17 @@
 * golang的channel + goroutine
 ### 性能优化：磁盘、网络、代码
 * df、free、netstat、ss 、pprof
+* 例如：排查接口超时，思路：
+ - 1.网络 
+ - 2.top--load 
+ - 3.代码是否有死锁堵塞 
+ - 4.runtime gc
+ - 5. pprof，发现P的数量大，对应M就打，造成线程数调度耗时较大，从而引发接口超时，使用 runtime.NumCPU()  && GOMAXPROC
+ ~~~
+  curl http://127.0.0.1:8001/debug/pprof/trace?seconds=300 > trace.out 
+  go tool trace trace.out
+ ~~~
+
 ## 微服务工程化实践
 
 ### 工程化组织：统一框架、脚手架效率
@@ -60,5 +71,7 @@
 ## reference
 * [wx](https://mp.weixin.qq.com/s/x4EEXq6-6xv-lm-dAazcag)
 * [wx](https://mp.weixin.qq.com/s/8vASJavOQrXw5bGEEMwd9Q)
+* [wx](https://mp.weixin.qq.com/s/4SzZEUTmjwAAsH5Qd2GWLQ)
 * [gocn](https://gocn.vip/topics/10983)
 * [se](https://segmentfault.com/a/1190000037435267)
+* [tx](https://cloud.tencent.com/developer/news/568962)
