@@ -1,8 +1,8 @@
-# 重构小结
 
 ## 高可用
 
 ### 负载均衡
+* nginx 、consul 、consul-template
 ### 限流、熔断降级、回滚、隔离
 * 限流：总并发qps、瞬时并发nginx limit_conn、令牌
 * 熔断降级：超时降级、超时次数、故障降级
