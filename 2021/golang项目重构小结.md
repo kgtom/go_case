@@ -32,7 +32,7 @@
  - 2.top--load 
  - 3.代码是否有死锁堵塞 
  - 4.runtime gc
- - 5. pprof，发现P的数量大，对应M就打，造成线程数调度耗时较大，从而引发接口超时，使用 runtime.NumCPU()  && GOMAXPROC
+ - 5.性能分析 pprof，发现P的数量大，对应M就打，造成线程数调度耗时较大，从而引发接口超时，使用 runtime.NumCPU()  && GOMAXPROC
  
  ~~~
   curl http://127.0.0.1:8001/debug/pprof/trace?seconds=300 > trace.out 
@@ -78,3 +78,5 @@
 * [gocn](https://gocn.vip/topics/10983)
 * [se](https://segmentfault.com/a/1190000037435267)
 * [tx](https://cloud.tencent.com/developer/news/568962)
+
+
