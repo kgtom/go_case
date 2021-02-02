@@ -22,7 +22,9 @@
 * 异步：将请求先放在mq或者redis中，然后再请求
 * 消峰：并发量大的时候，不直接访问db
 ### 并行：充分利用cpu
-* golang的channel + goroutine
+* golang的channel+goroutine+sync包
+* channel: 协调多个逻辑片段，解耦生产者和消费者
+* sync:某个数据结构内部状态的原子操作
 ### 性能优化：磁盘、网络、代码
 * df、free、netstat、ss 、pprof
 * 例如：排查接口超时，思路：
@@ -31,6 +33,7 @@
  - 3.代码是否有死锁堵塞 
  - 4.runtime gc
  - 5. pprof，发现P的数量大，对应M就打，造成线程数调度耗时较大，从而引发接口超时，使用 runtime.NumCPU()  && GOMAXPROC
+ 
  ~~~
   curl http://127.0.0.1:8001/debug/pprof/trace?seconds=300 > trace.out 
   go tool trace trace.out
