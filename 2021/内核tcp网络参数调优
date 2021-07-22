@@ -1,0 +1,41 @@
+内核tcp网络参数调优
+
+背景：
+在 nat 的网络环境下，通过 nginx(tengine)访问upstream配置的服务器时会有不定时连接超时或者提示后端服务网络不通(nc 、telnet)
+返回upstream_status:5xx 错误。
+出现时机，比如：服务上云过程中，部分服务在k8s，部分服务在物理机，不在一个nat。
+
+
+原因：
+  net.ipv4.tcp_timestamps=1
+
+
+解决：修改 net.ipv4.tcp_timestamps、tcp_tw_recycle都为0
+
+
+cat /proc/sys/net/ipv4/tcp_timestamps
+1
+echo 0 > /proc/sys/net/ipv4/tcp_timestamps
+
+cat /proc/sys/net/ipv4/tcp_tw_recycle
+1
+echo 0 > /proc/sys/net/ipv4/tcp_tw_recycle
+
+理论： RFC 1323里有这样的定义： An additional mechanism could be added to the TCP, a per-host cache of the last timestamp received from any connection. This value could then be used in the PAWS mechanism to reject old duplicate segments from earlier incarnations of the connection, if the timestamp clock can be guaranteed to have ticked at least once since the old connection was open. This would require that the TIME-WAIT delay plus the RTT together must be at least one tick of the sender's timestamp clock. Such an extension is not part of the proposal of this RFC.
+    大概的中文意思就是：TCP协议中有一种机制，缓存了每个主机（即ip）过来的连接最新的timestamp值。
+这个缓存的值可以用于PAWS（Protect Against Wrapped Sequence numbers，是一个简单的防止重复报文的机制）中，来丢弃当前连接中可能的旧的重复报文。
+
+因为tcp_timestamps缺省就是开启的，所以当tcp_tw_recycle被开启后，实际上这种行为就被激活了，当客户端或服务端以NAT方式构建的时候就可能出现问题。
+
+限于实际的网络情况，很多用户的客户端没有公网IP，只能依赖于NAT分享同一个公网IP， 这样由于同一NAT下的不同机器的时间戳不一定保证同步，所以就导致同一个NAT过来的数据包的时间戳不能保证单调递增。这样就打破了RFC1323中PAWS方法依赖于对端时间戳单调递增的要求。所以就出现时间戳错乱，导致丢弃时间戳较小的数据包，表现为packets rejects in established connections because of timestamp的数据不断增加，导致连接超时 或者 后端 5xx错误。
+负载均衡通过某个端口向upstream的服务器发起连接，源地址为负载均衡的内部地址，如果先后两次连接源端口相同，这台服务器先后收到两个包，第一个包的timestamp被服务器保存着，第二个包的timestamp比第一个还老(客户端时间不一致）。服务器基于PAWS，判断第二个包是重复报文，则丢弃之，upstream_status 5xx 错误。
+
+通过在tengine服务器上抓包，你会发现只有SYN包，但upsteam服务器不回复ACK包，因为SYN包已经被丢弃了。
+为了验证这一结果，可以执行netstat -s | grep timestamp 命令，看输出里面passive connections rejected by timestamp 一项的数字变化。
+
+参考：
+https://www.kernel.org/doc/Documentation/networking/ip-sysctl.txt
+https://zhuanlan.zhihu.com/p/145939529
+https://blog.huoding.com/2012/01/19/142
+
+
