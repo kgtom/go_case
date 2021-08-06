@@ -1,0 +1,31 @@
+“Cannot assign requested address.”是 因为linux分配的客户端连接端口耗尽，无法建立新的socket连接导致。
+ 虽然socket会正常关闭，但是端口不会立即释放，而是处于TIME_WAIT状态，默认等待60s后才释放，所以为了解决这个问题，我们可以调整端口是释放时间或者增加更多端口并且快速回收资源，具体如下：
+
+解决方案：
+
+1.调低time_wait状态端口等待时间：默认为60s，修改为15~30s
+sysctl -w net.ipv4.tcp_fin_timeout=30
+
+2. 修改tcp/ip协议配置， 通过配置/proc/sys/net/ipv4/tcp_tw_resue, 默认为0，修改为1，释放TIME_WAIT端口给新连接使用
+sysctl -w net.ipv4.tcp_timestamps=1
+
+3. 修改tcp/ip协议配置，快速回收socket资源，默认为0，修改为1
+sysctl -w net.ipv4.tcp_tw_recycle=1
+
+4.增加端口：
+bash# sysctl -a |grep port_range
+net.ipv4.ip_local_port_range = 5000    65000      -----说明 5000~65000端口可用
+
+修改参数：
+$ vi /etc/sysctl.conf
+net.ipv4.ip_local_port_range = 10000     65000      -----说明10000~65000端口可用
+
+Ps:记录一下其他问题
+大量time_wait ：正常情况，只要不出现端口不沟通，就可以，如果需要调整，则按照上面调整即可
+
+大量close_wait: 服务端没有向客户端发送fin,没有是否资源，eg: defer resp.body.close()
+
+2MSL: 一要保证全双工流程结束，避免迟到的报文出现在新的链接上；另一个确保最后一个ack报文到达服务端
+
+
+
